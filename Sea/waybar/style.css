@@ -1,0 +1,177 @@
+@import "theme/nord.css";
+
+* {
+    all: unset;
+    font-family: JetBrainsMono Nerd Font;
+    font-size: 13px;
+    border-radius: 0px;
+    font-weight: bold;
+}
+
+window#waybar {
+    background-color: @alt-bg;
+    color: @fg;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+button {
+    box-shadow: inset 0 -3px transparent;
+    min-height: 30px;
+}
+
+button:hover {
+    background: inherit;
+    box-shadow: inset 0 -3px @fg;
+}
+#custom-sidepanel,
+#custom-gsr,
+#custom-notification,
+#language,
+#clock,
+#network,
+#pulseaudio,
+#tray,
+#idle_inhibitor,
+#workspaces {
+    margin: 0 0;
+    background: @bg;
+    color: @fg;
+    transition: background 0.2s linear;
+}
+#custom-sidepanel,
+#custom-gsr,
+#tray,
+#custom-notification,
+#language,
+#clock,
+#network,
+#pulseaudio,
+#tray,
+#idle_inhibitor {
+    padding: 1em 0;
+}
+
+#workspaces button.special,
+#workspaces button.empty,
+#workspaces button {
+    padding: 0.5em 0;
+    background-color: @bg;
+    transition: all 0.2s linear;
+    opacity: 0.5;
+}
+
+#workspaces button {
+    background: @active;
+}
+
+#workspaces button.active {
+    color: @fg;
+    background: @active;
+    transition: all 0.2s linear;
+    opacity:1.0;
+    box-shadow: inset 0 -3px @fg;
+}
+
+#workspaces button.active {
+    min-height: 40px;
+}
+
+#workspaces button:hover {
+    color: @fg;
+    background: @alt-bg;
+    opacity:0.3;
+}
+
+#workspaces button.urgent {
+    background: @warning;
+}
+
+#network {
+    background-color: @on;
+    color: @alt-bg;
+}
+
+#network.disconnected {
+    background-color: @inactive;
+}
+
+#pulseaudio.muted {
+    background-color: @inactive;
+}
+#tray decoration {
+    border-radius: 0px;
+    border: 2px solid @fg;
+}
+#tray menu {
+    border-radius: 0px;
+    border: none;
+    background: @bg;
+}
+#tray window {
+    border: none;
+}
+#tray menu > separator {
+    border: none;
+}
+#tray menu > menuitem {
+    border-radius: 0px;
+    border: none;
+    padding: 0.5em 0.5em;
+    background: #2E3440;
+}
+#tray image {
+    border: none;
+}
+#tray menu > menuitem:hover {
+    border: none;
+    /* border-bottom: 2px solid @fg; */
+    background: @fg;
+    color: @alt-bg;
+    transition: background 0.1s ease-in-out;
+}
+#tray menu > menuitem > label {
+    border: none;
+}
+#tray > .passive {
+    border: none;
+    -gtk-icon-effect: dim;
+}
+#tray > .active {
+    border: none;
+}
+#tray > .needs-attention {
+    border: none;
+    -gtk-icon-effect: highlight;
+}
+
+#idle_inhibitor.activated {
+    background-color: @warning;
+    color: @alt-bg;
+}
+
+#custom-notification.notification {
+    background-color: @active;
+}
+
+#custom-notification.inhibited-none,
+#custom-notification.inhibited-notification,
+#custom-notification.dnd-notification,
+#custom-notification.dnd-inhibited-none,
+#custom-notification.dnd-inhibited-notification,
+#custom-notification.dnd-none {
+    background-color: @inactive;
+}
+
+#custom-gsr.on {
+  background-color: @active;
+  color: @alt-bg;
+}
+tooltip {
+    background-color: @alt-bg;
+}
+
+tooltip label {
+    color: @fg;
+}
+

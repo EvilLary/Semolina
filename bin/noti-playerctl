@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -eu
+#simple playerctl script but it's really bad : (, i can't script for my own good sake
+
+send_notification() {
+
+    #status=`playerctl --player=%any,firefox status --format "{{(status)}}"`
+    title=`playerctl --player=%any,vlc,"plasma-browser-integration",firefox metadata --format "{{ title }}"`
+    artist=`playerctl --player=%any,vlc,"plasma-browser-integration",firefox metadata --format "{{(artist) }}"`
+#     arturl=`playerctl --player=vlc,%any,"plasma-browser-integration",firefox metadata | grep artUrl | awk '{ print $3 }'`
+    arturl=`playerctl --player=%any,vlc,"plasma-browser-integration",firefox metadata --format "{{(mpris:artUrl)}}"`
+
+  	notify-send -a "playerctl" \
+      -h string:x-canonical-private-synchronous:playerctl \
+	    -i "$(echo -e "${arturl//%/\\x}")" "$title" "$artist" \
+      -r 5566 \
+	    -t 2000 \
+	    -u low \
+	    -e
+
+}
+
+case $1 in
+    play-pause)
+        playerctl --player=%any,vlc,"plasma-browser-integration",firefox $1
+        EXITCODE=$?
+        test $EXITCODE -eq 0 && sleep 0.1 && send_notification
+        exit $EXITCODE
+	;;
+    next)
+        playerctl --player=%any,vlc,"plasma-browser-integration",firefox $1
+        EXITCODE=$?
+        test $EXITCODE -eq 0 && sleep 0.1 && send_notification
+        exit $EXITCODE
+	;;
+    previous)
+        playerctl --player=%any,vlc,"plasma-browser-integration",firefox $1
+        EXITCODE=$?
+        test $EXITCODE -eq 0 && send_notification
+        exit $EXITCODE
+	;;
+
+esac

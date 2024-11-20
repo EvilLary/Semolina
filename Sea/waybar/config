@@ -1,0 +1,131 @@
+{
+    "layer": "top",
+    "position": "right",
+    "height": "100%",
+    "width": 50,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": [],
+    "modules-right": ["tray", "idle_inhibitor", "pulseaudio", "network","clock","custom/notification"],
+
+     "hyprland/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": true,
+        "warp-on-scroll": false,
+        "show-special": false,
+        "format": "{icon}",
+        "on-scroll-up": "hyprctl dispatch workspace e-1 >> /dev/null",
+        "on-scroll-down": "hyprctl dispatch workspace e+1 >> /dev/null",
+            "format-icons": {
+                "1": "I",
+                "2": "II",
+                "3": "III",
+                "4": "IV",
+                "5": "V",
+                "6": "VI",
+                "7": "VII",
+                "8": "VIII",
+            },
+        "persistent-workspaces": {
+            "*": 8
+        }
+     },
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 22,
+        "active-first": false,
+        "tooltip-format": "{title}",
+        "on-click": "activate",
+        "on-click-middle": "close",
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": "⏾"
+        }
+    },
+    "tray": {
+        "icon-size": 19,
+        "spacing": 10
+    },
+    "clock": {
+        "format": "{:%I\n%M\n%p}",
+        "tooltip-format": "{:%A %dth of %B %Y}",
+        "format-alt": "{:%d\n%m\n%y}"
+    },
+    "network": {
+        "format-wifi": " ",
+        "format-ethernet": "󰌘",
+        "tooltip-format": "{ifname} via {gwaddr}",
+        "format-linked": "⚠",
+        "format-disconnected": "󰌙",
+       // "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+    "pulseaudio": {
+        "scroll-step": 5,
+        "format": "{volume}%",
+        "format-bluetooth": "{volume}% ",
+        "format-bluetooth-muted": "{format_source}",
+        "format-muted": "󰝟",
+        "format-source": "{volume}% ",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click-right": "hyprctl dispatch exec [float] pavucontrol-qt &",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle &"
+    },
+    "hyprland/language": {
+    "format": "{}",
+    "format-en": "EN",
+    "format-ar": "العربية",
+    "keyboard-name": "cooler-master-ck530-v2-gaming-mechanical-keyboard",
+    "on-click": "sleep 0.1 && hyprctl switchxkblayout 'cooler-master-ck530-v2-gaming-mechanical-keyboard' 'next' &"
+    },
+    "custom/notification": {
+        "tooltip": true,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "󰂞",
+            "none": "󰂚",
+            "dnd-notification": "󰵙",
+            "dnd-none": "󰂛",
+            "inhibited-notification": "󰵙",
+            "inhibited-none": "󰂛",
+            "dnd-inhibited-notification": "󰵙",
+            "dnd-inhibited-none": "󰂛 "
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "sleep 0.11 && swaync-client -t -sw & disown",
+        "on-click-right": "swaync-client -d -sw &",
+        "escape": true
+    },
+    "custom/gsr": {
+        "tooltip": true,
+        "format": "{icon}",
+        "format-icons": {
+            "on": "󰯜",
+            "off": "󰯛"
+        },
+        "return-type": "json",
+        "exec": "replay-buffer waybar",
+        "on-click": "sleep 0.1 && replay-buffer toggle & disown",
+        "on-click-right": "replay-buffer save",
+        "escape": true
+    },
+    "custom/sidepanel": {
+        "tooltip": false,
+        "format": "",
+        "on-click": "sleep 0.1 && QT_QUICK_CONTROLS_STYLE=org.kde.breeze quickshell --config sidepanel"
+    }
+}
+
