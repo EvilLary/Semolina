@@ -1,0 +1,72 @@
+import QtQuick
+import Quickshell
+import "root:"
+
+Scope {
+
+    required property bool targetVisible
+    required property QsWindow rootWindow
+    default property alias popupItems: popbody.data
+        property int offsetX: 5
+
+        onTargetVisibleChanged: {
+            if (targetVisible) {
+                loader.active = true
+                popup.visible = true
+                popupAnim.to = 0
+            } else {
+                popupAnim.to = popupBackground.width
+            }
+
+            popupAnim.restart()
+        }
+
+        Loader {
+            id: loader
+
+            PopupWindow {
+                id: popup
+
+                anchor.window: rootWindow
+                anchor.rect.x: - (popup.width + offsetX)
+                anchor.rect.y: (rootWindow.height - popup.height)
+
+                color: "transparent"
+                width: popupBackground.width
+                height: popupBackground.height
+
+
+                Rectangle {
+                    id: popupBackground
+                    border {
+                        color: Config.colors.windowBorder
+                        width: 1
+                    }
+                    radius: 4
+                    width: 500
+                    height: 450
+                    x: width
+                    color: Config.colors.background
+                    SmoothedAnimation {
+                        id: popupAnim
+                        target: popupBackground
+                        property: "x"
+                        velocity: 1800
+                        onFinished: {
+                            if (popupBackground.x == popup.width) {
+                                popup.visible = false
+                                loader.active = false
+                            }
+                        }
+                    }
+                    Item {
+                        id: popbody
+                        anchors {
+                            fill: parent
+                            margins: 10
+                        }
+                    }
+                }
+            }
+        }
+}
