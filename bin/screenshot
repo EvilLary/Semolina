@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -e
-Screenshot_Dir="$HOME/Pictures/Screenshots"
+
+#I Know, It's better to check if this dir exits but......
+Screenshot_Dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
 DATE=$(date +"%Y-%m-%d_%H:%M:%S")
 
 send_notification() {
 
-  case $(notify-send -u low "Screenshot Saved" -i "$Screenshot_Dir/Screenshot_$DATE.png" --action view="View" --action edit="Edit" --action delete="Delete" -r 9977) in
-    view) 
+  case $(timeout 5s notify-send -u low "Screenshot Saved" -i "$Screenshot_Dir/Screenshot_$DATE.png" --action view="View" --action edit="Edit" --action delete="Delete" -r 9977 ) in
+    view)
       xdg-open "$Screenshot_Dir/Screenshot_$DATE.png" & disown
     ;;
     delete)
       rm "$Screenshot_Dir/Screenshot_$DATE.png"
-#       dunstify -u low "Screenshot deleted" -r 9977
     ;;
     edit)
       satty -f "$Screenshot_Dir/Screenshot_$DATE.png" & disown
@@ -23,24 +24,27 @@ send_notification() {
 
 }
 
-case $1 in 
+function copyScreenshot() {
+    wl-copy < "$Screenshot_Dir/Screenshot_$DATE.png"
+}
+
+case $1 in
   full)
 
-    grim -t png "$Screenshot_Dir/Screenshot_$DATE.png"
-    cd $Screenshot_Dir && wl-copy < Screenshot_$DATE.png
+    grim -c -t png "$Screenshot_Dir/Screenshot_$DATE.png"
+    copyScreenshot
     send_notification
 
   ;;
   region)
 
-    grim -t png -l 4 -g "$(slurp)" "$Screenshot_Dir/Screenshot_$DATE.png"
-    #because for some reason it won't let me copy when I'm not in the same directory
-    cd $Screenshot_Dir && wl-copy < Screenshot_$DATE.png
+    grim -c -t png -l 4 -g "$(slurp)" "$Screenshot_Dir/Screenshot_$DATE.png"
+    copyScreenshot
     send_notification
 
   ;;
   *)
-    echo "Usage: screenshot 
+    echo "Usage: screenshot
     full: take a full screenshot of the Screenshot
     region: take a screenshot of a selected area"
   ;;

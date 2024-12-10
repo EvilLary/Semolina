@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 set -eu
 
@@ -32,7 +33,8 @@ GetWindowInfo() {
                 Hyprland)
                     #Requires jq
                     WindowClass="`hyprctl activewindow -j  | jq -r '.class'`"
-                    WindowTitle="`hyprctl activewindow -j | jq -r '.title'`"
+                    #For what ever reason, an empty space, is at the end of the window title, so hero we go
+                    WindowTitle="`hyprctl activewindow -j | jq -r '.title' | sed -Ee '/[[:space:]]+$/s///' `"
                 ;;
 
                 GNOME)
@@ -58,25 +60,28 @@ GetWindowInfo() {
 Notify () {
 
     #local ReplayName="$(basename --suffix=".mkv" "$1" )" # I don't know which one is more effecient for naming the thumbnail, basename or date
-#     local Date=$(date +"%Y-%m-%d_%H:%M:%S")
+    local Date=$(date +"%Y-%m-%d_%H:%M:%S")
     #ffmpeg -i $1 -s 640x360 -ss 5 -vframes 1 "/tmp/thumb_$Date.png" slow, need to read ffmpeg's wiki
-    #ffmpegthumbnailer -i "$1" -q 0 -s 480 -o "/tmp/thumb_$Date.png" # comment it out if thumbs are useless
-    qdbus org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText "keyframe-record" "$2 saved"
-#     case $(notify-send -a "GSR" "GSR" "$2 saved" -i /home/spicy/Downloads/replay.png --action play="Play $2" --action delete="Delete $2" -t 5000 -u normal) in
-#
-#       play)
-#         xdg-open "$1" &> /dev/null & disown
-#       ;;
-#       delete)
-#         rm "$1"
-#       ;;
-#       *)
-#         rm "/tmp/thumb_$Date.png"
-#         exit 1
-#       ;;
-#     esac
-#
-#     rm "/tmp/thumb_$Date.png"
+    ffmpegthumbnailer -i "$1" -q 0 -s 480 -o "/tmp/thumb_$Date.png" # comment it out if thumbs are useless
+    #OSD msg for KDE
+    #qdbus org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText "keyframe-record" "$2 saved"
+    qs -c shell msg ipc osdmsg "$2 saved" "keyframe-record"
+    #echo "osd:$2 saved,keyframe-record" | socat - /run/user/1000/quickshell.sock
+    case $(timeout 5s notify-send -a "GSR" "GSR" "$2 saved" -i "/tmp/thumb_$Date.png" --action play="Play $2" --action delete="Delete $2" -t 5000 -u normal) in
+
+      play)
+        xdg-open "$1" &> /dev/null & disown
+      ;;
+      delete)
+        rm "$1"
+      ;;
+      *)
+        rm "/tmp/thumb_$Date.png"
+        exit 1
+      ;;
+    esac
+
+    rm "/tmp/thumb_$Date.png"
 
 }
 
