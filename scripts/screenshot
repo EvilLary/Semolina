@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#set -e
+
+#I Know, It's better to check if this dir exits but......
+Screenshot_Dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+DATE=$(date +"%Y-%m-%d_%H:%M:%S")
+
+send_notification() {
+
+    case $(notify-send -u normal --app-name "Screenshot" "Screenshot Saved" -i "spectacle" --action view-preview="View" --action edit="Edit" --action delete="Delete" --hint STRING:image-path:"$Screenshot_Dir/Screenshot_$DATE.png" ) in
+        view-preview)
+            xdg-open "$Screenshot_Dir/Screenshot_$DATE.png" & disown
+        ;;
+        delete)
+            rm "$Screenshot_Dir/Screenshot_$DATE.png"
+        ;;
+        edit)
+            satty -f "$Screenshot_Dir/Screenshot_$DATE.png" & disown
+        ;;
+        *)
+            exit 1
+        ;;
+    esac
+
+}
+
+function copyScreenshot() {
+    wl-copy < "$Screenshot_Dir/Screenshot_$DATE.png"
+}
+
+case $1 in 
+    full)
+        grim -c -t png "$Screenshot_Dir/Screenshot_$DATE.png"
+        copyScreenshot
+        send_notification
+    ;;
+    region)
+        qs ipc -c new call screenshot start
+        sleep 0.05
+        coords="$(slurp -b '#1E263690' -c '#285A77' -w 0)"
+        if [ $? -ne 0 ]; then
+            qs ipc -c new call screenshot stop
+            exit 0
+        else
+            grim -t png -l 7 -g "$coords" - | shhh -r 10 > "$Screenshot_Dir/Screenshot_$DATE.png"
+            qs ipc -c new call screenshot stop
+            copyScreenshot
+            send_notification
+        fi
+    ;;
+    *)
+        echo "Usage: screenshot
+        full: take a full screenshot of the Screenshot
+        region: take a screenshot of a selected area"
+    ;;
+esac

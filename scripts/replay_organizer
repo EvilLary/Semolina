@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -eu
+
+#This script is only intended to run with GPU-screen-recorder under -sc flag.
+#It also doesn't have any functionality for native games unless you add its class to WhiteListApps variable.
+#It simply checks if the window class is one one of white listed, so it can fetch the window name and create a directory and move the replay into it.
+#Something similar can be done with regular recordings.
+
+GetWindowInfo() {
+
+    case $XDG_SESSION_TYPE in
+
+        x11)
+            #Requires xdotool
+            WindowClass="`xdotool getactivewindow getwindowclassname`"
+            WindowTitle="`xdotool getactivewindow getwindowname`"
+        ;;
+
+        wayland)
+            #xdotool can be used in Wayland, since Games run by Wine/Proton are still using Xwayland
+            case $XDG_CURRENT_DESKTOP in
+
+                KDE)
+                    #Requires kdotool
+                    WindowClass="`kdotool getactivewindow getwindowclassname`"
+                    WindowTitle="`kdotool getactivewindow getwindowname`"
+                ;;
+
+                Hyprland)
+                    #Requires jq
+                    WindowClass="`hyprctl activewindow -j  | jq -r '.class'`"
+                    #WindowTitle="`hyprctl activewindow -j | jq -r '.title'`"
+                    WindowTitle="`hyprctl activewindow -j | jq -r '.title' | sed -Ee '/[[:blank:]]+$/s///' `"
+                ;;
+
+                *)
+                    echo "ahhh huh use a better DE/WM"
+                    exit 1
+                ;;
+            esac
+        ;;
+
+        tty)
+            echo "blud using tty🙏😭"
+            exit 1
+        ;;
+
+        *)
+            echo "Unknown session type. Exiting."
+            exit 1
+        ;;
+    esac
+}
+
+Notify () {
+
+    local Date=$(date +"%Y-%m-%d_%H:%M:%S")
+    ffmpegthumbnailer -i "$1" -q 0 -s 480 -o "/tmp/thumb_$Date.png"
+    #qdbus org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText "keyframe-record" "$2 saved"
+    qs ipc -c new call ipc osdmsg "$2 saved" "gpu-screen-recorder"
+    # qs -c new msg ipc osdmsg "$2 saved" "gpu-screen-recorder"
+    case $(notify-send -a "GPU Screen Recorder" "$2 saved" "" -i "gpu-screen-recorder" --hint STRING:image-path:"/tmp/thumb_$Date.png" --action media-playback-start="Play" --action delete="Delete" -t 5000 -u normal) in
+
+      media-playback-start)
+        xdg-open "$1" &> /dev/null & disown
+      ;;
+      delete)
+        rm "$1"
+      ;;
+      *)
+      ;;
+    esac
+
+    rm "/tmp/thumb_$Date.png"
+}
+
+OrganizeReplay() {
+
+    GetWindowInfo
+    local ReplayLocation="$1"
+    local ReplayDir="${XDG_VIDEOS_DIR:-$HOME/Videos}/Replays"
+    local WhiteListApps='^steam_app_|.exe|gamescope$|^Minecraft|RPCS3$|portal2_linux$'
+
+    if [[ ( $WindowClass =~ $WhiteListApps ) ]]; then
+        mkdir -p "$ReplayDir/$WindowTitle"
+        mv "$ReplayLocation" "$ReplayDir/$WindowTitle/"
+        local ReplayLocation="$ReplayDir/$WindowTitle/$(basename "$ReplayLocation")"
+    fi
+
+    Notify "$ReplayLocation" "Replay"
+
+}
+
+case $2 in
+
+    regular)
+        Notify "$1" "Recoding"
+    ;;
+
+    replay)
+        OrganizeReplay $1
+    ;;
+
+    *)
+        echo "Script is intended to run after GPU-screen-recorder saves a replay with the "-sc path/to/script" argument"
+    ;;
+
+esac

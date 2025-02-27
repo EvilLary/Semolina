@@ -1,0 +1,10 @@
+set default-bg 'rgba(29,31,47,0.9)'
+
+set statusbar-bg 'rgba(42,42,55)'
+
+set recolor true
+set recolor-lightcolor 'rgba(0,0,0,0)'
+#set selection-clipboard "clipboard"
+
+set guioptions 's'
+#set sandbox none
