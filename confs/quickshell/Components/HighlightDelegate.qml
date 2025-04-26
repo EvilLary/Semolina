@@ -1,5 +1,6 @@
 import QtQuick
-import '../Libs'
+import "../"
+// import '../Libs'
 
 Rectangle {
     radius: Config.globalRadius

@@ -1,7 +1,8 @@
 import QtQuick
 import Quickshell.Hyprland
 import QtQuick.Layouts
-import "root:Libs"
+import "../../Libs"
+import "../../"
 
 Item {
     id: root

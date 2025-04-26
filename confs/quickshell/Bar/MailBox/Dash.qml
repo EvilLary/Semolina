@@ -1,16 +1,10 @@
 import QtQuick
 import QtQuick.Controls
-import "../../Libs"
+import "../../Components" as C
 
-Rectangle {
+C.OutRect {
     anchors.fill: parent
-    color: Config.colors.background
-    radius: Config.globalRadius
-
-    border {
-        color: Qt.alpha(Config.colors.text,0.2)
-        width: 1
-    }
+    signal closePopup
     clip: false
 
     StackView {
@@ -21,16 +15,30 @@ Rectangle {
         }
         initialItem: InitialPage {}
         pushEnter: Transition {
-            OpacityAnimator {from: 0; to: 1; duration: 250}
+            OpacityAnimator {
+                from: 0
+                to: 1
+                duration: 250
+            }
         }
         pushExit: Transition {
-            OpacityAnimator {to: 0; duration: 250}
+            OpacityAnimator {
+                to: 0
+                duration: 250
+            }
         }
         popEnter: Transition {
-            OpacityAnimator {from: 0; to: 1; duration: 250}
+            OpacityAnimator {
+                from: 0
+                to: 1
+                duration: 250
+            }
         }
         popExit: Transition {
-            OpacityAnimator {to: 0; duration: 250}
+            OpacityAnimator {
+                to: 0
+                duration: 250
+            }
         }
     }
     // GRIDLAYOUT for buttons

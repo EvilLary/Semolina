@@ -1,6 +1,8 @@
 import QtQuick
 import Quickshell.Widgets
 import Quickshell
+// import "../Libs"
+import "../"
 
 MouseArea {
     id: mouseArea
@@ -27,6 +29,8 @@ MouseArea {
         implicitWidth: mouseArea.width
         implicitHeight: mouseArea.height
         anchors.centerIn: parent
+        pathBackground: Config.colors.background
+
 
         value: Math.min(mouseArea.value * this.endAngle, this.endAngle)
         //value: mouseArea.value * this.endAngle
@@ -35,11 +39,12 @@ MouseArea {
     }
     IconImage {
         id: icon
-        source: Quickshell.iconPath(mouseArea.iconSource,'audio-player')
+        source: Quickshell.iconPath(mouseArea.iconSource, 'audio-player')
         anchors.centerIn: parent
         implicitSize: (mouseArea.width / 2)
-        mipmap: false
-        scale: (mouseArea.containsMouse) ? 0.8 : 1
+        mipmap: true
+        // asynchronous: true
+        scale: (mouseArea.containsPress) ? 0.8 : 1
         Behavior on scale {
             NumberAnimation {
                 easing.type: Easing.Linear
@@ -49,10 +54,11 @@ MouseArea {
     }
 
     Text {
-        text: Math.trunc(mouseArea.value * 100)
-        color: "white"
+        //text: Math.trunc(mouseArea.value * 100).toLocaleString(Qt.locale("ar_SA"), "f", 0)
+        text: Math.trunc(mouseArea.value * 100).toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d])
+        color: Config.colors.text
         font {
-            pointSize: 8
+            pointSize: 9
             weight: Font.Bold
             hintingPreference: Font.PreferNoHinting
         }
@@ -66,25 +72,28 @@ MouseArea {
     }
     onClicked: mouse => {
         switch (mouse.button) {
-            case (Qt.LeftButton):
-                leftClick();
-                break;
-            case (Qt.RightButton):
-                rightClick();
-                break;
-            // case (Qt.MiddleButton):
-            // middleClick()
-            // break;
+        case (Qt.LeftButton):
+            leftClick();
+            mouse.accepted = true
+            break;
+        case (Qt.RightButton):
+            rightClick();
+            mouse.accepted = true
+            break;
+        // case (Qt.MiddleButton):
+        // middleClick()
+        // break;
         }
     }
     onWheel: event => {
         //event.accepted = true;
-        const delta = (event.angleDelta.y || event.angleDelta.x)
+        const delta = (event.angleDelta.y || event.angleDelta.x);
         if (delta > 1) {
-            scrollUp()
-        }
-        else if (delta < 1) {
-            scrollDown()
+            scrollUp();
+            event.accepted = true
+        } else if (delta < 1) {
+            scrollDown();
+            event.accepted = true
         }
     }
 }

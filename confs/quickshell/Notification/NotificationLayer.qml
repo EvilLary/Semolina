@@ -11,7 +11,7 @@ Scope {
     Connections {
         target: NotificationProvider
         function onNotification(notification) {
-            root.toasts.unshift(notification)
+            root.toasts.unshift(notification);
         }
     }
 
@@ -31,7 +31,7 @@ Scope {
             exclusiveZone: 0
             color: "transparent"
             //screen: Quickshell.screens.filter(screen => screen.name == Config.activeMonitor)[0];
-            screen: Quickshell.screens[0];
+            screen: Quickshell.screens[0]
             anchors {
                 top: true
                 right: true
@@ -55,45 +55,78 @@ Scope {
                 }
                 anchors.fill: parent
                 spacing: 10
+                readonly property int duration: 175
                 displaced: Transition {
-                    NumberAnimation { properties: "y"; duration: 300; easing.type: Easing.OutBack; easing.overshoot: 1 }
+                    NumberAnimation {
+                        properties: "y"
+                        duration: 300
+                        easing.type: Easing.OutBack
+                        easing.overshoot: 1.01
+                    }
                 }
                 add: Transition {
                     NumberAnimation { properties: "x"; from: 250; duration: 200 }
                 }
                 remove: Transition {
                     ParallelAnimation {
-                        NumberAnimation { property: "opacity"; to: 0; duration: 250 }
-                        NumberAnimation { properties: "x"; to: 250; duration: 250 }
+                        NumberAnimation {
+                            property: "opacity"
+                            to: 0
+                            duration: list.duration
+                        }
+                        NumberAnimation {
+                            properties: "x"
+                            to: 250
+                            duration: list.duration
+                        }
                     }
                 }
                 removeDisplaced: Transition {
-                    NumberAnimation { properties: "y"; duration: 250 }
+                    NumberAnimation {
+                        properties: "y"
+                        duration: list.duration
+                    }
                 }
                 populate: Transition {
                     ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0 ;to: 1; duration: 250 }
-                        NumberAnimation { properties: "x"; from: 250; duration: 200 }
+                        NumberAnimation {
+                            property: "opacity"
+                            from: 0
+                            to: 1
+                            duration: list.duration
+                        }
+                        NumberAnimation {
+                            properties: "x"
+                            from: 250
+                            duration: list.duration
+                        }
                     }
                 }
                 move: Transition {
-                    NumberAnimation { properties: "y"; duration: 250 }
+                    NumberAnimation {
+                        properties: "y"
+                        duration: list.duration
+                    }
                 }
                 moveDisplaced: Transition {
-                    NumberAnimation { properties: "y"; duration: 250 }
+                    NumberAnimation {
+                        properties: "y"
+                        duration: list.duration
+                    }
                 }
                 delegate: NotificationBody {
                     id: rect
                     required property int index
                     isToast: true
                     width: 350
-                    onExpired: root.toasts.splice(rect.index,1)
+                    onExpired: root.toasts.splice(rect.index, 1)
                     Connections {
                         target: rect.modelData
                         function onClosed() {
-                            root.toasts.splice(rect.index,1)
+                            root.toasts.splice(rect.index, 1);
                         }
                     }
+                    // Component.onCompleted: print(this.height)
                 }
             }
         }

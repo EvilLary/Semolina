@@ -3,17 +3,17 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import QtQuick
 import Quickshell.Wayland
-import "../Libs"
+import Quickshell.Io
 
 Scope {
     id: root
 
-    Connections {
-        target: IPC
-        function onStop(): void {
+    IpcHandler {
+        target: "screenshot"
+        function stop(): void {
             loader.active = false
         }
-        function onStart(): void {
+        function start(): void {
             loader.active = true
         }
     }

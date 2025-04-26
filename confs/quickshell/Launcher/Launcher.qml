@@ -1,16 +1,16 @@
-pragma Singleton
 pragma ComponentBehavior: Bound
 
 import Quickshell
 import QtQuick
-import "../Libs"
+import "../"
 import "../Components"
 import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Hyprland
 
-Singleton {
+Scope {
     id: root
 
     GlobalShortcut {
@@ -18,15 +18,15 @@ Singleton {
         description: "Application Launcher"
         onPressed: loader.activeAsync = !loader.active
     }
-    property string appId;
+    property string appId
     function toggle() {
-        loader.activeAsync = !loader.active
+        loader.activeAsync = !loader.active;
     }
-    function hola() {}
+    function hola() {
+    }
     LazyLoader {
         id: loader
         WlrLayershell {
-
             id: layer
             layer: WlrLayer.Top
             namespace: "shell"
@@ -44,15 +44,16 @@ Singleton {
 
             Process {
                 id: runner
-                command: ["uwsmapp.sh",root.appId];
-                manageLifetime: false
+                command: ["uwsmapp.sh", root.appId]
                 running: false
                 onExited: loader.active = false
             }
             function launch(appId: string): void {
-                root.appId = appId + '.desktop'
-                runner.running = true
-                loader.active = false
+                root.appId = appId + '.desktop';
+                // print(root.appId);
+                runner.startDetached();
+                //runner.running = true
+                loader.active = false;
             }
             anchors {
                 top: true
@@ -74,11 +75,11 @@ Singleton {
                 layer.enabled: true
                 border {
                     width: 1
-                    color: Qt.alpha(Config.colors.text,0.2)
+                    color: Qt.alpha(Config.colors.text, 0.2)
                 }
                 TextField {
                     id: searchBar
-                    placeholderText: "Applications..."
+                    placeholderText: "تطبيقات..."
                     leftPadding: 56
                     height: 58
                     anchors {
@@ -92,12 +93,15 @@ Singleton {
                     Keys.onEscapePressed: loader.active = false
                     Keys.onPressed: event => {
                         switch (event.key) {
-                            case (Qt.Key_Backtab): {
+                        case (Qt.Key_Backtab):
+                            {
                                 entries.decrementCurrentIndex();
                                 break;
                             }
-                            ;;
-                            case (Qt.Key_Tab): {
+                            ;
+                            ;
+                        case (Qt.Key_Tab):
+                            {
                                 entries.incrementCurrentIndex();
                                 break;
                             }
@@ -105,17 +109,23 @@ Singleton {
                     }
                     onAccepted: {
                         //print(entries.currentItem.modelData.id)
-                        launch(entries.currentItem.modelData.id);
+                        // print(entry)
+                        layer.launch(entries.currentItem.modelData.id);
                         //entries.currentItem.modelData.execute()
                     }
                     renderType: Text.NativeRendering
+                    onTextChanged: entries.currentIndex = 0
                     font {
                         weight: Font.Bold
                         pointSize: 14
                         hintingPreference: Font.PreferNoHinting
                     }
                     background: Rectangle {
-                        color: Qt.alpha(Config.colors.accent,0.9)
+                        color: Qt.alpha(Config.colors.altBackground, 0.9)
+                        border {
+                            width: 2
+                            color: Qt.alpha(Config.colors.accent, 0.6)
+                        }
                         radius: Config.globalRadius
                         Image {
                             anchors {
@@ -124,7 +134,7 @@ Singleton {
                                 leftMargin: 8
                             }
                             smooth: false
-                            asynchronous: true
+                            // asynchronous: true
                             sourceSize {
                                 width: 45
                                 height: 45
@@ -152,108 +162,78 @@ Singleton {
                             margins: 8
                             fill: parent
                         }
-                        //qs crashes or the list produces a weird list without this property set to zero
                         cacheBuffer: 0
-
                         spacing: 8
-                        highlightMoveDuration : 125
+                        highlightMoveDuration: 0
+                        highlightResizeDuration: 0
                         keyNavigationWraps: true
-
-                        //Shamelessly stolen from outfoxxed
                         model: ScriptModel {
-                            values: DesktopEntries.applications.values
-                            .map(object => {
-                                const stxt = searchBar.text.toLowerCase();
-                                const ntxt = object.name.toLowerCase();
-                                let si = 0;
-                                let ni = 0;
-
-                                let matches = [];
-                                let startMatch = -1;
-
-                                for (let si = 0; si != stxt.length; ++si) {
-                                    const sc = stxt[si];
-
-                                    while (true) {
-                                        // Drop any entries with letters that don't exist in order
-                                        if (ni == ntxt.length) return null;
-
-                                        const nc = ntxt[ni++];
-
-                                        if (nc == sc) {
-                                            if (startMatch == -1) startMatch = ni;
-                                            break;
-                                        } else {
-                                            if (startMatch != -1) {
-                                                matches.push({
-                                                    index: startMatch,
-                                                    length: ni - startMatch,
-                                                });
-
-                                                startMatch = -1;
-                                            }
-                                        }
-                                    }
+                            values: DesktopEntries.applications.values.filter(entry => {
+                                return searchBar.text.length === 0 || entry.name.toLowerCase().includes(searchBar.text.toLowerCase());
+                            }).sort((a, b) => {
+                                const ab_diff = a.name.localeCompare(b.name);
+                                if (searchBar.text.length == 0) {
+                                    return ab_diff;
                                 }
-
-                                if (startMatch != -1) {
-                                    matches.push({
-                                        index: startMatch,
-                                        length: ni - startMatch + 1,
-                                    });
+                                const acheck = a.name.toLowerCase().startsWith(searchBar.text.toLowerCase());
+                                const bcheck = b.name.toLowerCase().startsWith(searchBar.text.toLowerCase());
+                                if (acheck && bcheck) {
+                                    return ab_diff;
+                                } else if (acheck) {
+                                    return -1;
+                                } else if (bcheck) {
+                                    return 1;
                                 }
-
-                                return {
-                                    object: object,
-                                    matches: matches,
-                                };
+                                return ab_diff;
                             })
-                            .filter(entry => entry !== null)
-                            .sort((a, b) => {
-                                let ai = 0;
-                                let bi = 0;
-                                let s = 0;
-
-                                while (ai != a.matches.length && bi != b.matches.length) {
-                                    const am = a.matches[ai];
-                                    const bm = b.matches[bi];
-
-                                    s = bm.length - am.length;
-                                    if (s != 0) return s;
-
-                                    s = am.index - bm.index;
-                                    if (s != 0) return s;
-
-                                    ++ai;
-                                    ++bi;
-                                }
-
-                                s = a.matches.length - b.matches.length;
-                                if (s != 0) return s;
-                                return a.object.name.length - b.object.name.length;
-                            })
-                            .map(entry => entry.object);
-
                             onValuesChanged: entries.currentIndex = 0
                         }
-
                         add: Transition {
-                            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
+                            NumberAnimation {
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                                duration: 100
+                            }
                         }
 
                         displaced: Transition {
-                            NumberAnimation { property: "y"; duration: 200; easing.type: Easing.OutCubic }
-                            NumberAnimation { property: "opacity"; to: 1; duration: 100 }
+                            NumberAnimation {
+                                property: "y"
+                                duration: 200
+                                easing.type: Easing.OutCubic
+                            }
+                            NumberAnimation {
+                                property: "opacity"
+                                to: 1
+                                duration: 100
+                            }
                         }
 
                         move: Transition {
-                            NumberAnimation { property: "y"; duration: 200; easing.type: Easing.OutCubic }
-                            NumberAnimation { property: "opacity"; to: 1; duration: 100 }
+                            NumberAnimation {
+                                property: "y"
+                                duration: 200
+                                easing.type: Easing.OutCubic
+                            }
+                            NumberAnimation {
+                                property: "opacity"
+                                to: 1
+                                duration: 100
+                            }
                         }
 
                         remove: Transition {
-                            NumberAnimation { property: "y"; duration: 200; easing.type: Easing.OutCubic }
-                            NumberAnimation { property: "opacity"; to: 0; duration: 100 }
+                            NumberAnimation {
+                                property: "y"
+                                duration: 200
+                                easing.type: Easing.OutCubic
+                            }
+                            NumberAnimation {
+                                property: "opacity"
+                                to: 0
+                                duration: 100
+                            }
                         }
                         highlight: HighlightDelegate {}
                         delegate: Rectangle {
@@ -273,7 +253,7 @@ Singleton {
                                 }
                                 onEntered: entries.currentIndex = app.index
                             }
-                            Column {
+                            ColumnLayout {
                                 anchors {
                                     left: entryIcon.right
                                     verticalCenter: parent.verticalCenter
@@ -301,12 +281,12 @@ Singleton {
                             }
                             Image {
                                 id: entryIcon
-                                source: Quickshell.iconPath(app.modelData.icon,true)
+                                source: Quickshell.iconPath(app.modelData.icon, "application-x-desktop")
                                 sourceSize {
                                     width: 48
                                     height: 48
                                 }
-                                asynchronous: true
+                                // asynchronous: true
                                 anchors {
                                     left: parent.left
                                     verticalCenter: parent.verticalCenter

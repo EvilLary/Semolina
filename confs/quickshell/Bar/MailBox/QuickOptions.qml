@@ -1,14 +1,15 @@
 import QtQuick
 import QtQuick.Layouts
-import 'root:Libs'
-import './'
+import '../../Libs'
+import '../../Components' as C
+// import './'
 
-Rectangle {
+C.InnRect {
     id: quickSettings
 
-    color: Config.colors.altBackground
-    radius: Config.globalRadius
-
+    Network {
+        id: network
+    }
     GridLayout {
         anchors {
             fill: parent
@@ -20,17 +21,17 @@ Rectangle {
         OptionButton {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            text: 'Notifications'
+            text: 'اشعارات'
             statusText: {
                 if(NotificationProvider.toastsCount == 0) {
-                    return 'Empty'
+                    return 'فارغ'
                 }
                 else {
-                    return `${NotificationProvider.toastsCount} Notifications`
+                    return `${NotificationProvider.toastsCount} اخطار`
                 }
             }
             status: !NotificationProvider.dndStatus
-            icon: NotificationProvider.dndStatus? 'image://icon/notification-disabled-symbolic' : 'image://icon/notification-symbolic'
+            icon: NotificationProvider.dndStatus? 'image://icon/notifications-disabled-symbolic' : 'image://icon/notifications-symbolic'
             onClicked: NotificationProvider.dndStatus = !NotificationProvider.dndStatus
             hasPage: true
             onOpenPage: stackView.push('NotificationPage.qml')
@@ -38,18 +39,18 @@ Rectangle {
         OptionButton {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            text: 'Wi-Fi'
-            statusText: Network.status.activeConnections.replace('Wi-Fi: ','')
-            status: Network.wifiStatus
-            icon: `image://icon/${Network.icon}`
-            onClicked: Network.toggleWifi();
+            text: 'واي-فاي'
+            statusText: network.status.activeConnections.replace('Wi-Fi: ','')
+            status: network.wifiStatus
+            icon: `image://icon/${network.icon}`
+            onClicked: network.toggleWifi();
         }
         OptionButton {
             Layout.fillWidth: true;
             Layout.fillHeight: true;
-            text: 'Night Light';
+            text: 'ضوء ليلي';
             status: Stuff.nightLight;
-            statusText: Stuff.nightLight ? '3500k Enabled' : 'Disabled';
+            statusText: Stuff.nightLight ? 'مفعل ٣٥٠٠' : 'طافي';
             icon: Stuff.nightLight ? 'image://icon/redshift-status-on' : 'image://icon/redshift-status-off';
             hasPage: true;
             onClicked: Stuff.toggleNL();
@@ -57,11 +58,12 @@ Rectangle {
         OptionButton {
             Layout.fillWidth: true;
             Layout.fillHeight: true;
-            text: 'Idle Inhibitor';
+            text: 'سهور';
             status: Stuff.inhibitorStatus;
-            statusText: Stuff.inhibitorStatus ? 'Enabled' : 'Disabled';
-            icon: Stuff.inhibitorStatus ? 'image://icon/my-caffeine-on-symbolic' : 'image://icon/my-caffeine-off-symbolic';
+            statusText: Stuff.inhibitorStatus ? 'مفعل' : 'طافي';
+            icon: Stuff.inhibitorStatus ? 'image://icon/system-suspend-inhibited' : 'image://icon/system-suspend-uninhibited';
             onClicked: Stuff.toggleInhibit();
         }
     }
+    // Component.onCompleted: print(JSON.stringify(NotificationProvider.toastsCount))
 }

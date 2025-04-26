@@ -1,11 +1,13 @@
 import QtQuick
-import '../Libs'
+import Quickshell
+import "../"
+import '../Components'
 
 Item {
 
-    //SystemClock {
-    //    id: clock
-    //}
+    SystemClock {
+       id: clock
+    }
     CircularPath {
         id: hours
         anchors.centerIn: parent
@@ -17,7 +19,7 @@ Item {
         startAngle: -90
         strokeWidth: 8
         value: {
-            const hours = (Clock.hours % 12) || 12;
+            const hours = (clock.hours % 12) || 12;
             return (hours * 30)
         }
     }
@@ -27,12 +29,12 @@ Item {
         implicitHeight: 150
         implicitWidth: 150
 
-        pathColor: Config.colors.active
+        pathColor: Config.colors.light
         pathBackground: Config.colors.altBackground
         endAngle: 360
         startAngle: -90
         strokeWidth: 8
-        value: (Clock.minutes * 6)
+        value: (clock.minutes * 6)
     }
     CircularPath {
         id: seconds
@@ -45,6 +47,6 @@ Item {
         endAngle: 360
         startAngle: -90
         strokeWidth: 8
-        value: (Clock.seconds * 6)
+        value: (clock.seconds * 6)
     }
 }

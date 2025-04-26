@@ -1,5 +1,5 @@
 import QtQuick
-import "root:Libs"
+import "../"
 import Quickshell
 import Quickshell.Widgets
 

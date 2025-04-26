@@ -1,5 +1,6 @@
 import QtQuick
 import '../../Libs'
+import "../../"
 import QtQuick.Layouts
 import Quickshell
 

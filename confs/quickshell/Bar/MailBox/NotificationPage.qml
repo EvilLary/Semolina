@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import "../../Libs"
+import "../../"
 import '../../Notification'
+
 Item {
 
     id: root
@@ -27,8 +29,8 @@ Item {
             icon.source: "arrow-left"
             height: 40
             width: 40
-            icon.width: 40
-            icon.height: 40
+            icon.width: 25
+            icon.height: 25
             onClicked: stackView.pop(null)
         }
         Text {
@@ -69,4 +71,5 @@ Item {
             }
         }
     }
+    // Component.onCompleted: print(JSON.stringify(NotificationProvider.tracked))
 }

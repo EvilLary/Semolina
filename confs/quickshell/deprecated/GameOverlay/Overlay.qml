@@ -4,11 +4,11 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import QtQuick
 import Quickshell.Wayland
-import "../Libs"
 import Quickshell.Io
 import Quickshell.Hyprland
-import '../Bar/Indicators'
-import '../Bar/Mpris'
+import "../Libs"
+import "../Bar/Indicators"
+import "../Widgets"
 
 Singleton {
     id: root
@@ -25,37 +25,38 @@ Singleton {
         property string playtime
     }
 
-
     property string cmdArgument
 
-    function hola() {}
+    function hola() {
+    }
     GlobalShortcut {
         name: "gameoverlay"
         description: "idk"
         onPressed: {
-            if (Toplevels.activeWindow?.appId?.startsWith("steam_app_")) {
-                const id = Toplevels.activeWindow.appId.slice(10,)
-                if (id != 0) {
-                    playtime.running = true
+            const id = ToplevelManager?.activeToplevel?.appId;
+            if (id.startsWith("steam_app_")) {
+                const steam_id = id.slice(10);
+                if (steam_id != 0) {
+                    playtime.running = true;
                     //root.gameInfo.id = id
                     //root.gameInfo.title = Toplevels.activeWindow.title
-                    root.gameInfo.isGame = true
-                    root.gameInfo.gameLogo = `${Quickshell.env("HOME")}/.local/share/Steam/appcache/librarycache/${id}/logo`
+                    root.gameInfo.isGame = true;
+                    root.gameInfo.gameLogo = `${Quickshell.env("HOME")}/.local/share/Steam/appcache/librarycache/${steam_id}/logo`;
                 }
             } else {
-                root.gameInfo.isGame = false
+                root.gameInfo.isGame = false;
             }
-            NotificationProvider.isDashboardOpen = true
-            root.refreshStats()
-            loader.activeAsync = true
+            NotificationProvider.isDashboardOpen = true;
+            root.refreshStats();
+            loader.activeAsync = true;
         }
     }
     Process {
         id: gameModeStatus
-        command: ['sh','-c','hyprctl getoption animations:enabled -j | jq .int']
+        command: ['sh', '-c', 'hyprctl getoption animations:enabled -j | jq .int']
         stdout: SplitParser {
             onRead: data => {
-                root.gameModeStatus = !(data == 1)
+                root.gameModeStatus = !(data == 1);
             }
         }
     }
@@ -64,39 +65,38 @@ Singleton {
         command: ['gsr', 'status']
         stdout: SplitParser {
             onRead: data => {
-                const status = JSON.parse(data)
-                root.gsrBuffer = status.buffer
-                root.gsrRecording = status.recording
+                const status = JSON.parse(data);
+                root.gsrBuffer = status.buffer;
+                root.gsrRecording = status.recording;
             }
         }
     }
     Process {
         id: playtime
-        command: ['sh','-c','ps -o etime= -p $(hyprctl activewindow -j | jq .pid)']
+        command: ['sh', '-c', 'ps -o etime= -p $(hyprctl activewindow -j | jq .pid)']
         stdout: SplitParser {
             onRead: data => {
-                const time = data.trim().split(':')
-                let hours
-                let minutes
+                const time = data.trim().split(':');
+                let hours;
+                let minutes;
                 if (time.length == 2) {
-                    hours = 0
-                    minutes = time[0]
+                    hours = 0;
+                    minutes = time[0];
                 } else {
-                    hours = time[0]
-                    minutes = time [1]
+                    hours = time[0];
+                    minutes = time[1];
                 }
                 if (hours == 0) {
                     if (minutes == '00') {
-                        root.gameInfo.playtime = 'less than a minute'
+                        root.gameInfo.playtime = 'less than a minute';
                     } else {
-                        root.gameInfo.playtime = minutes + ' minutes'
+                        root.gameInfo.playtime = minutes + ' minutes';
                     }
                 } else {
                     if (hours == '01') {
-                        root.gameInfo.playtime = 'One hour and ' + minutes + ' minutes'
-                    }
-                    else {
-                        root.gameInfo.playtime = hours + ' hours and ' + minutes + ' minutes'
+                        root.gameInfo.playtime = 'One hour and ' + minutes + ' minutes';
+                    } else {
+                        root.gameInfo.playtime = hours + ' hours and ' + minutes + ' minutes';
                     }
                 }
             }
@@ -104,27 +104,27 @@ Singleton {
     }
     Process {
         id: cmd
-        command: ['sh','-c',`${root.cmdArgument}`]
-        manageLifetime: false
-        onExited: (code,status) => {
-            root.cmdArgument = ""
-            root.refreshStats()
+        command: ['sh', '-c', `${root.cmdArgument}`]
+        onExited: (code, status) => {
+            root.cmdArgument = "";
+            root.refreshStats();
         }
     }
     function refreshStats(): void {
-        gsrStatus.running = true
-        gameModeStatus.running = true
+        gsrStatus.running = true;
+        gameModeStatus.running = true;
     }
 
     LazyLoader {
         id: loader
-        onActiveChanged: if(!this.active) NotificationProvider.isDashboardOpen = false
+        onActiveChanged: if (!this.active)
+            NotificationProvider.isDashboardOpen = false
 
         WlrLayershell {
             id: layer
 
             layer: WlrLayer.Overlay
-            keyboardFocus: WlrKeyboardFocus.OnDemand
+            keyboardFocus: WlrKeyboardFocus.Exclusive
             namespace: "shell"
 
             exclusionMode: ExclusionMode.Ignore
@@ -135,17 +135,17 @@ Singleton {
                 left: true
                 right: true
             }
-            color: Qt.alpha("black",0.3)
+            color: Qt.alpha("black", 0.3)
             HyprlandFocusGrab {
-                id: grab;
-                active: true;
-                windows: [ layer ];
+                id: grab
+                active: true
+                windows: [layer]
                 // onCleared: loader.active = false
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked:  {
-                    loader.active = false
+                onClicked: {
+                    loader.active = false;
                 }
                 propagateComposedEvents: false
             }
@@ -164,7 +164,7 @@ Singleton {
                 Keys.onEscapePressed: loader.active = false
                 border {
                     width: 1
-                    color: Qt.alpha(Config.colors.text,0.2)
+                    color: Qt.alpha(Config.colors.text, 0.2)
                 }
             }
             Loader {
@@ -199,15 +199,17 @@ Singleton {
                 width: 500
                 height: 500
             }
-            Loader {
-                active: MprisProvider.trackedPlayer != null
+            MprisWidget {
                 anchors {
                     right: parent.right
                     bottom: mixer.top
                     bottomMargin: 20
                     rightMargin: 20
                 }
-                sourceComponent: MprisWidget {}
+                border {
+                    width: 1
+                    color: Qt.alpha(Config.colors.text, 0.2)
+                }
             }
         }
     }

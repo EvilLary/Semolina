@@ -1,21 +1,18 @@
-pragma Singleton
-pragma ComponentBehavior: Bound
-
-import Quickshell
+// pragma Singleton
 import QtQuick
 import org.kde.plasma.networkmanagement as PlasmaNM
 
-Singleton {
+QtObject {
     id: root
 
     property alias icon: connectionIconProvider.connectionIcon
-    
+
     property alias wifiStatus: enabledConnections.wirelessEnabled
 
     property alias connections: enabledConnections
     property alias status: networkStatus
 
-    property var activeConnection
+    // property var activeConnection
 
     //Instantiator {
     //
@@ -38,27 +35,27 @@ Singleton {
     //        }
     //    }
     //}
-    PlasmaNM.NetworkStatus {
+    property PlasmaNM.NetworkStatus networkStatus: PlasmaNM.NetworkStatus {
         id: networkStatus
     }
     //PlasmaNM.WirelessStatus {
     //    id: wirelessStatus
     //}
-    PlasmaNM.EnabledConnections {
+    property PlasmaNM.EnabledConnections enabledConnections: PlasmaNM.EnabledConnections {
         id: enabledConnections
     }
-    PlasmaNM.ConnectionIcon {
+    property PlasmaNM.ConnectionIcon connectionIconProvider: PlasmaNM.ConnectionIcon {
         id: connectionIconProvider
     }
     //PlasmaNM.NetworkModel{
     //    id: networkModel
     //}
     //
-    PlasmaNM.Handler {
+    property PlasmaNM.Handler handler: PlasmaNM.Handler {
         id: handler
     }
 
     function toggleWifi(): void {
-        handler.enableWireless(!enabledConnections.wirelessEnabled)
+        handler.enableWireless(!enabledConnections.wirelessEnabled);
     }
 }

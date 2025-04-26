@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import "../Libs"
+import "../"
 
 Rectangle {
     id: root
@@ -35,7 +35,7 @@ Rectangle {
                     hoverEnabled: true
                 }
                 radius: Config.globalRadius
-                color: (this.active) ? Config.colors.accent : (mouseArea.containsMouse ? Config.colors.border : Config.colors.altBackground)
+                color: (this.active) ? Config.colors.accent : (mouseArea.containsMouse ? Config.colors.altBase : root.color)
                 Behavior on color {
                     ColorAnimation {
                         easing.type: Easing.Linear

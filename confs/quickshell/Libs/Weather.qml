@@ -10,7 +10,7 @@ Singleton {
     property int diff: 0
     property var locData: {}
     property var rawWeatherData: {}
-    property string city: ""
+    property string city: "Dammam"
 
     property QtObject weatherData: QtObject {
 
@@ -27,7 +27,7 @@ Singleton {
         readonly property string windDirectionUnit: root.rawWeatherData?.current_weather_units?.winddirection ?? "°"
 
         readonly property string weatherCode: root.rawWeatherData?.current_weather?.weathercode ?? "1000"
-        readonly property bool isDay: (root.rawWeatherData?.current_weather?.is_day == 1) ? true : false
+        readonly property bool isDay: root.rawWeatherData?.current_weather?.is_day == 1
 
         property string weatherIcon
         property string weatherDescription
@@ -88,67 +88,67 @@ Singleton {
     function resolveWeatherCodes(): void {
         switch (root.weatherData.weatherCode) {
             case "0":
-                root.weatherData.weatherDescription = "Clear Sky"
+                root.weatherData.weatherDescription = "سماء صافية"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-clear" : "weather-clear-night"
                 break;
             case "1":
-                root.weatherData.weatherDescription = "Mainly Clear"
+                root.weatherData.weatherDescription = "صافي جزئيا"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-few-clouds" : "weather-few-clouds-night"
                 break;
             case "2":
-                root.weatherData.weatherDescription = "Party Cloudy"
+                root.weatherData.weatherDescription = "مغيم جزئيا"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-few-clouds" : "weather-few-clouds-night"
                 break;
             case "3":
-                root.weatherData.weatherDescription = "Overcast"
+                root.weatherData.weatherDescription = "غيمي"
                 root.weatherData.weatherIcon = "weather-overcast"
                 break;
             case "45":
-                root.weatherData.weatherDescription = "Fog"
+                root.weatherData.weatherDescription = "ضباب"
                 root.weatherData.weatherIcon = "weather-fog"
                 break;
             case "48":
-                root.weatherData.weatherDescription = "Depositing Rime Fog"
+                root.weatherData.weatherDescription = "ترسب ضباب"
                 root.weatherData.weatherIcon = "weather-fog"
                 break;
             case "51":
-                root.weatherData.weatherDescription = "Light Drizzle"
+                root.weatherData.weatherDescription = "رذاذ خفيف"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers-scattered-day" : "weather-showers-scattered-night"
                 break;
             case "53":
-                root.weatherData.weatherDescription = "Moderate Drizzle"
+                root.weatherData.weatherDescription = "رذاذ متوسط"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "55":
-                root.weatherData.weatherDescription = "Dense Drizzle"
+                root.weatherData.weatherDescription = "رذاذ كثيف"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "56":
-                root.weatherData.weatherDescription = "Light Freezing Drizzle"
+                root.weatherData.weatherDescription = "رذاذ متجمد خفيف"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "57":
-                root.weatherData.weatherDescription = "Dense Freezing Drizzle"
+                root.weatherData.weatherDescription = "رذاذ متجمد كثيف"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "61":
-                root.weatherData.weatherDescription = "Slight Rain"
+                root.weatherData.weatherDescription = "مطر خفيف"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "63":
-                root.weatherData.weatherDescription = "Moderate Rain"
+                root.weatherData.weatherDescription = "مطر متوسط"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-storm" : "weather-storm-night"
                 break;
             case "65":
-                root.weatherData.weatherDescription = "Heavy Rain"
+                root.weatherData.weatherDescription = "مطر قوي"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-storm" : "weather-storm-night"
                 break;
             case "66":
-                root.weatherData.weatherDescription = "Light Freezing Rain"
+                root.weatherData.weatherDescription = "مطر متجمد خفيف"
                 root.weatherData.weatherIcon = "weather-freezing-rain"
                 break;
             case "67":
-                root.weatherData.weatherDescription = "Heavy Freezing Rain"
+                root.weatherData.weatherDescription = "مطر متجمد قوي"
                 root.weatherData.weatherIcon = "weather-freezing-rain"
                 break;
             case "71":
@@ -168,39 +168,39 @@ Singleton {
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-snow" : "weather-snow-night"
                 break;
             case "80":
-                root.weatherData.weatherDescription = "Slight Rain Showers"
+                root.weatherData.weatherDescription = "زخات مطر خفيفة"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers-scattered-day" : "weather-showers-scattered-night"
                 break;
             case "81":
-                root.weatherData.weatherDescription = "Moderate Rain Showers"
+                root.weatherData.weatherDescription = "زخات مطر متوسطة"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "82":
-                root.weatherData.weatherDescription = "Violent Rain Showers"
+                root.weatherData.weatherDescription = "زخات مطر قوية"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-showers" : "weather-showers-night"
                 break;
             case "85":
-                root.weatherData.weatherDescription = "Slight Snow Showers"
+                root.weatherData.weatherDescription = "زخات ثلج خفيفة"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-snow-scattered-day" : "weather-snow-scattered-night"
                 break;
             case "86":
-                root.weatherData.weatherDescription = "Heavy Snow Showers"
+                root.weatherData.weatherDescription = "زخات ثلج قوية"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-snow" : "weather-snow-night"
                 break;
             case "95":
-                root.weatherData.weatherDescription = "Thunderstorm"
+                root.weatherData.weatherDescription = "عاصفة رعدية"
                 root.weatherData.weatherIcon = root.weatherData.isDay ? "weather-storm" : "weather-storm-night"
                 break;
             case "96":
-                root.weatherData.weatherDescription = "Thunderstorm with Light Hail"
+                root.weatherData.weatherDescription = "عاصفة رعدية مع برد خفيف"
                 root.weatherData.weatherIcon = "weather-hail"
                 break;
             case "99":
-                root.weatherData.weatherDescription = "Thunderstorm with Heavy Hail"
+                root.weatherData.weatherDescription = "عاصفة رعدية مع برد كثيف"
                 root.weatherData.weatherIcon = "weather-hail"
                 break;
             default:
-                root.weatherData.weatherDescription = "Unknown"
+                root.weatherData.weatherDescription = "غير معروف"
                 root.weatherData.weatherIcon = "weather-none-available"
                 break;
         }

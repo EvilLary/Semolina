@@ -1,7 +1,7 @@
 import Quickshell
 import QtQuick
 import Quickshell.Wayland
-import "root:Libs"
+// import "../Libs"
 
 PanelWindow {
     id: panel
@@ -10,11 +10,12 @@ PanelWindow {
 
     WlrLayershell.namespace: "shell"
     WlrLayershell.layer: WlrLayer.Bottom
-    height: 48
-    //exclusiveZone: height
-    //exclusionMode: ExclusionMode.Normal
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    exclusiveZone: height
+    exclusionMode: ExclusionMode.Normal
 
-    color: "black"
+    color: "transparent"
+    //color: Qt.alpha(Config.colors.background, 0.5)
 
     Item {
         id: barItems

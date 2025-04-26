@@ -1,7 +1,7 @@
 // I'm aware that this technically isn't throbber, but it sounds cool
 import QtQuick
 import QtQuick.Shapes
-import "root:Libs"
+import "../"
 
 Item {
 
@@ -36,12 +36,12 @@ Item {
         }
     }
     Image {
-        source: 'image://icon/window-close'
+        source: 'image://icon/dialog-close-symbolic'
         anchors.centerIn: parent
         smooth: false
         asynchronous: true
-        width: throbber.height
-        height: throbber.width
+        width: throbber.height - 5
+        height: throbber.width - 5
     }
     PropertyAnimation {
         id: pathAnim

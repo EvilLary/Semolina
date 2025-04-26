@@ -9,9 +9,10 @@ Scope {
 
     required property QsWindow rootWindow
     required property Item parentItem
-    property string contentUrl
 
-    property Item contentItem
+    property alias active: loader.active
+    property string contentUrl
+    property Component contentItem
     //property bool sideSlide: false
     property int popupWidth: 450
     property int popupHeight: 300
@@ -19,6 +20,7 @@ Scope {
     property int ycoords
     property int offsetX: 0
     property int offsetY: 0
+
 
     readonly property alias isOpen: loader.active
     signal close
@@ -30,7 +32,13 @@ Scope {
         root.ycoords = coords.y;
         loader.active = true;
     }
-
+    function toggle(): void {
+        if (loader.active) {
+            root.close();
+        } else {
+            root.open();
+        }
+    }
     LazyLoader {
         id: loader
         PopupWindow {
@@ -38,17 +46,30 @@ Scope {
 
             anchor {
                 window: root.rootWindow
-                rect.x: 0
-                rect.y: 0
-                onAnchoring: {
-                    //yeah..
-                    popup.anchor.rect.y = root.ycoords - (popup.height) - 15;
-                    popup.anchor.rect.x = (root.xcoords) - (popupWidth / 2) + root.offsetX;
+                rect.x: {
+                    const hl_width = root.popupWidth / 2;
+                    const pre_calc_x = (root.xcoords) - (root.popupWidth / 2) + root.offsetX;
+                    const xmargins = 15;
+                    if (root.xcoords < root.rootWindow.width / 2) {
+                        if (root.xcoords < hl_width) {
+                            return xmargins;
+                        } else {
+                            return pre_calc_x;
+                        }
+                    } else {
+                        const remaining = root.rootWindow.width - root.xcoords;
+                        if (remaining > hl_width) {
+                            return pre_calc_x;
+                        } else {
+                            const rectx = root.rootWindow.width - root.popupWidth - xmargins;
+                            return rectx;
+                        }
+                    }
                 }
+                rect.y: -((popup.height) + 5)
                 //gravity: Edges.Top | Edges.Right
                 //edges: Edges.Bottom | Edges.Right
             }
-
             //surfaceFormat {
             //    opaque: true
             //}
@@ -74,11 +95,25 @@ Scope {
             Loader {
                 id: popupBody
                 anchors.fill: parent
-                source: root.contentUrl
+                //source: root.contentUrl
+                //sourceComponent: root.contentItem
                 layer.enabled: true
                 focus: true
                 Keys.onEscapePressed: popup.hideAnimation()
-                Keys.forwardTo: popupBody.children
+                Keys.forwardTo: [popupBody.item]
+                Component.onCompleted: {
+                    if (root.contentUrl) {
+                        popupBody.setSource(root.contentUrl);
+                    } else {
+                        popupBody.sourceComponent = root.contentItem;
+                    }
+                }
+            }
+            Connections {
+                target: popupBody.item
+                function onClosePopup(): void {
+                    popup.hideAnimation()
+                }
             }
             NumberAnimation {
                 id: opacityAnimator
@@ -100,6 +135,7 @@ Scope {
                 grap.active = true;
             }
             function hideAnimation(): void {
+                popupBody.focus = false;
                 opacityAnimator.from = 1;
                 opacityAnimator.to = 0;
                 opacityAnimator.restart();

@@ -1,6 +1,5 @@
 import QtQuick
-import "root:Libs"
-
+import "../../"
 
 MouseArea {
     id: mouseArea

@@ -1,4 +1,5 @@
 pragma Singleton
+pragma ComponentBehavior: Bound
 
 import Quickshell
 import Quickshell.Services.Notifications
@@ -15,18 +16,18 @@ Singleton {
     property string icon: {
         if (root.toastsCount > 0) {
             if (root.dndStatus) {
-                return Quickshell.iconPath("indicator-notification-unread-dnd")
+                return Quickshell.iconPath("notification-active")
             } 
             else {
-                return Quickshell.iconPath("indicator-notification-unread")
+                return Quickshell.iconPath("notification-active")
             }
         } 
         else {
             if (root.dndStatus) {
-                return Quickshell.iconPath("indicator-notification-read-dnd")
+                return Quickshell.iconPath("notification-disabled")
             }
             else {
-                return Quickshell.iconPath("indicator-notification-read")
+                return Quickshell.iconPath("notification-inactive")
             }
         }
     }

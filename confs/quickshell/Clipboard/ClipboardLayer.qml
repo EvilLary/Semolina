@@ -4,18 +4,18 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import QtQuick.Controls
 import Quickshell.Hyprland
-import "../Libs"
+
 Scope {
     id: root
-
-    Connections {
-        target: IPC
-        ignoreUnknownSignals: true
-        function onClipboardToggle(): void {
+    property int x
+    property int y
+    GlobalShortcut {
+        name: "clipboard"
+        description: "Show clipboard"
+        onPressed: {
             if (!loader.active) {
-                Clipboard.getClipboardData()
+                // clipboard.getClipboardData()
                 cursorPosition.running = true
             }
             else {
@@ -23,8 +23,12 @@ Scope {
             }
         }
     }
-    property int x
-    property int y
+    // Connections {
+    //     target: Clipboard
+    //     function onClose() {
+    //         loader.active = false
+    //     }
+    // }
     Process {
         id: cursorPosition
         command: ["sh","-c","hyprctl cursorpos"]
@@ -39,6 +43,7 @@ Scope {
             loader.active = true
         }
     }
+
     LazyLoader {
         id: loader
 
@@ -47,7 +52,7 @@ Scope {
             //WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.namespace: "shell"
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-            //exclusionMode: ExclusionMode.Normal
+            exclusionMode: ExclusionMode.Normal
 
             color: "transparent"
 
@@ -57,12 +62,7 @@ Scope {
                 right: true
                 left: true
             }
-            //HyprlandFocusGrab {
-            //    id: grab;
-            //    active: true;
-            //    windows: [ layer ];
-            //    // onCleared: loader.active = false
-            //}
+
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -73,8 +73,8 @@ Scope {
                 id: content
                 width: 500
                 height: 525
-                x: Math.min((root.x + 20),(layer.width - width - 20))
-                y: Math.min((root.y + 10),(layer.height - height - 10))
+                x: Math.min((root.x + 15),(layer.width - width - 15))
+                y: Math.min((root.y + 15),(layer.height - height - 8))
             }
             //Component.onCompleted: {
             //    const component = Qt.createComponent("Content.qml");

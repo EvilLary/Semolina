@@ -1,7 +1,7 @@
 import QtQuick
-import "root:Libs"
+import "../Libs"
 import QtQuick.Layouts
-import "root:Notification"
+import "../Notification"
 Rectangle {
     id: notificationList
     radius: Config.globalRadius

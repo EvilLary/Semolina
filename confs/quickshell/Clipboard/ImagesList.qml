@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Widgets
-import "root:Libs"
+import "../"
 import Quickshell
 
 ListView {
     id: list
     model: ScriptModel {
-        values: Clipboard.images
+        values: clipboard.images
     }
     cacheBuffer: 0
     spacing: 8
@@ -16,8 +16,8 @@ ListView {
     Keys.onTabPressed: list.incrementCurrentIndex()
     Keys.onBacktabPressed: list.decrementCurrentIndex()
     Keys.onReturnPressed: {
-        Clipboard.copyItem(list.currentItem.modelData.id)
-        IPC.clipboardToggle()
+        clipboard.copyItem(list.currentItem.modelData.id)
+        // IPC.clipboardToggle()
     }
     Keys.forwardTo: [searchBar]
     delegate: ClippingRectangle {
@@ -40,8 +40,9 @@ ListView {
                 list.currentIndex = entry.index
             }
             onClicked: {
-                Clipboard.copyItem(entry.modelData.id)
-                IPC.clipboardToggle()
+                clipboard.copyItem(entry.modelData.id)
+                // Clipboard.close()
+                // IPC.clipboardToggle()
             }
         }
         Image {
@@ -77,8 +78,8 @@ ListView {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    Clipboard.deleteItem(entry.modelData.id)
-                    Clipboard.images.splice(index,1)
+                    clipboard.deleteItem(entry.modelData.id)
+                    clipboard.images.splice(index,1)
                 }
             }
         }

@@ -1,15 +1,15 @@
-pragma Singleton
 pragma ComponentBehavior: Bound
+// pragma Singleton
 
-import Quickshell
+// import Quickshell
 import Quickshell.Services.Mpris
 import QtQuick
 
-Singleton {
+QtObject {
 
     id: root
     property MprisPlayer trackedPlayer
-    Instantiator {
+    property Instantiator inst: Instantiator {
         model: Mpris.players.values
 
         Connections {

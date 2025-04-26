@@ -3,10 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "root:Libs"
+import "../../Libs"
+import "../../"
 import Quickshell.Services.Pipewire
-import 'root:Mixer'
-import "."
 
 ScrollView {
     id: root
@@ -44,7 +43,7 @@ ScrollView {
             id: seperator
             visible: sources.count > 0
             Layout.fillWidth: true
-            color: Qt.alpha(Config.colors.text,0.1)
+            color: Config.colors.midlight
             implicitHeight: 1
         }
         Repeater {

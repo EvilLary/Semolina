@@ -5,11 +5,11 @@ import QtQuick.Layouts
 import Quickshell.Widgets
 import Quickshell
 import QtQuick.Controls
-import "root:Libs"
+import "../"
 
 Rectangle {
     id: rect
-    implicitHeight: column.childrenRect.height
+    implicitHeight: Math.max(column.childrenRect.height, 100)
 
     required property var modelData
     required property bool isToast
@@ -60,19 +60,20 @@ Rectangle {
                         leftMargin: 8
                     }
                     Image {
-                        source: Quickshell.iconPath(rect.modelData.appIcon, 'preferences-desktop-notification-bell')
+                        source: Quickshell.iconPath(rect.modelData.appIcon, 'notifications-symbolic')
                         sourceSize {
-                            width: 20
-                            height: 20
+                            width: 23
+                            height: 23
                         }
                         smooth: false
-                        asynchronous: true
+                        asynchronous: false
                     }
                     Text {
                         id: appName
                         text: rect.modelData.appName
                         Layout.fillWidth: true
                         renderType: Text.NativeRendering
+                        horizontalAlignment: Text.AlignLeft
                         color: Config.colors.text
                         font {
                             pointSize: 9

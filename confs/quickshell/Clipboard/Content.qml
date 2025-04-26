@@ -1,23 +1,30 @@
 import QtQuick
 import QtQuick.Layouts
-import "../Libs"
+import "../"
 import "../Components" as C
 import QtQuick.Controls
 
 Rectangle {
     id: content
-    //Could be done with mouseX,mouseY properties of MouseArea but this is easier
     color: Config.colors.background
     radius: Config.globalRadius
+    // required property Clipboard clipboard
     border {
-        color: Qt.alpha(Config.colors.text,0.2)
+        color: Qt.alpha(Config.colors.text, 0.2)
         width: 1
     }
 
+    Clipboard {
+        id: clipboard
+        onClose: {
+            loader.active = false;
+        }
+        Component.onCompleted: this.getClipboardData()
+    }
     MouseArea {
         anchors.fill: parent
         onClicked: event => {
-            event.accepted = false
+            event.accepted = false;
         }
     }
     RowLayout {
@@ -32,15 +39,15 @@ Rectangle {
         }
         C.TabBar {
             id: tabBar
-            model: ["Text","Images"]
+            model: ["نصوص", "صور"]
             textSize: 16
             Layout.fillHeight: true
             Layout.fillWidth: true
             onActiveIndexChanged: {
                 if (activeIndex == 0) {
-                    stackView.pop(null)
+                    stackView.pop(null);
                 } else if (activeIndex == 1) {
-                    stackView.push('./ImagesList.qml')
+                    stackView.push('./ImagesList.qml');
                 }
             }
         }
@@ -59,12 +66,12 @@ Rectangle {
                 id: wipeArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: Clipboard.wipeCliphist(),loader.active = false
+                onClicked: clipboard.wipeCliphist(), loader.active = false
             }
             Image {
                 anchors.centerIn: parent
-                source: "image://icon/delete"
-                asynchronous: true
+                source: "image://icon/edit-delete-shred-symbolic"
+                // asynchronous: true
                 smooth: false
                 fillMode: Image.PreserveAspectFit
                 sourceSize {
@@ -95,7 +102,7 @@ Rectangle {
             leftPadding: clipIcon.width + 8
             height: 50
 
-            placeholderText: "Clipboard..."
+            placeholderText: "حافظة..."
             color: Config.colors.text
             font {
                 weight: Font.Bold
@@ -115,7 +122,7 @@ Rectangle {
                         leftMargin: 5
                     }
                     smooth: false
-                    asynchronous: true
+                    // asynchronous: true
                     sourceSize {
                         width: 40
                         height: 40
@@ -136,7 +143,7 @@ Rectangle {
             }
             focus: true
             clip: true
-            initialItem: "./TextsList.qml"
+            initialItem: TextsList {}
             //Loader {
             //    id: textsList
             //    active: this.StackLayout.isCurrentItem && Clipboard.ready

@@ -11,30 +11,24 @@ MouseArea {
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: mouse => {
         switch (mouse.button) {
-            case (Qt.LeftButton):
-                dashboard.open()
-                NotificationProvider.isDashboardOpen = true
-                break;
-            case (Qt.RightButton):
-                NotificationProvider.dndStatus = !NotificationProvider.dndStatus
-                break;
+        case (Qt.LeftButton):
+            dashboard.toggle();
+            NotificationProvider.isDashboardOpen = true;
+            mouse.accepted = true;
+            break;
+        case (Qt.RightButton):
+            NotificationProvider.dndStatus = !NotificationProvider.dndStatus;
+            mouse.accepted = true;
+            break;
         }
     }
     Popup {
         id: dashboard
         rootWindow: root.bar
         parentItem: mailbox
-        contentUrl: "root:Bar/MailBox/Dash.qml"
-        //contentItem: Loader {
-        //    active: dashboard.isOpen
-        //    anchors.fill: parent
-        //    sourceComponent: Dash {}
-        //}
-
+        contentUrl: "../Bar/MailBox/Dash.qml"
         popupHeight: 600
         popupWidth: 500
-        offsetX: -220
-        offsetY: 20
         onClosed: {
             NotificationProvider.isDashboardOpen = false;
         }

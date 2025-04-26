@@ -1,7 +1,9 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
-import '../../Libs'
+import "../../"
 import QtQuick.Controls
 
 Rectangle {
@@ -10,72 +12,39 @@ Rectangle {
     radius: Config.globalRadius
     color: Config.colors.altBackground
 
-    readonly property list<QtObject> buttons: [ 
-        QtObject {
-            readonly property string icon: 'image://icon/system-shutdown-symbolic'
-            readonly property string tooltip: 'Shutdown the system'
-            readonly property Process process: Process {
-                command: ['sh','-c','systemctl poweroff']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+    Process {
+        id: cmd
+    }
+    readonly property list<var> buttons: [
+        {
+            icon: 'image://icon/system-shutdown-symbolic',
+            tooltip: 'Shutdown the system',
+            command: ['systemctl', 'poweroff'],
         },
-        QtObject {
-            readonly property string icon: 'image://icon/system-reboot-symbolic'
-            readonly property string tooltip: 'Reboot the system'
-            readonly property Process process: Process {
-                command: ['sh','-c','systemctl reboot']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+        {
+            icon: 'image://icon/system-reboot-symbolic',
+            tooltip: 'Reboot the system',
+            command: ['systemctl', 'reboot'],
         },
-        QtObject {
-            readonly property string icon: 'image://icon/system-suspend-symbolic'
-            readonly property string tooltip: 'Suspend the system'
-            readonly property Process process: Process {
-                command: ['sh','-c','systemctl sleep']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+        {
+            icon: 'image://icon/system-suspend-symbolic',
+            tooltip: 'Suspend the system',
+            command: ['systemctl', 'sleep'],
         },
-        QtObject {
-            readonly property string icon: 'image://icon/system-log-out-symbolic'
-            readonly property string tooltip: 'Logout from the sessoin'
-            readonly property Process process: Process {
-                command: ['sh','-c','uwsm stop']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+        {
+            icon: 'image://icon/system-log-out-symbolic',
+            tooltip: 'Logout from the sessoin',
+            command: ['uwsm', 'stop'],
         },
-        QtObject {
-            readonly property string icon: 'image://icon/system-reboot-symbolic'
-            readonly property string tooltip: 'Soft-reboot the system'
-            readonly property Process process: Process {
-                command: ['sh','-c','systemctl soft-reboot']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+        {
+            icon: 'image://icon/system-reboot-symbolic',
+            tooltip: 'Soft-reboot the system',
+            command: ['systemctl', 'soft-reboot'],
         },
-        QtObject {
-            readonly property string icon: 'image://icon/system-lock-screen-symbolic'
-            readonly property string tooltip: 'Lock the system'
-            readonly property Process process: Process {
-                command: ['sh','-c','loginctl lock-session']
-                manageLifetime: false
-            }
-            function exec(): void {
-                process.running = true
-            }
+        {
+            icon: 'image://icon/system-lock-screen-symbolic',
+            tooltip: 'Lock the system',
+            command: ['loginctl', 'lock-session'],
         }
     ]
 
@@ -96,8 +65,12 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 radius: Config.globalRadius
-                color: mouseArea.containsMouse ? Config.colors.negative : Config.colors.border
-                Behavior on color { ColorAnimation { duration: 125; } }
+                color: mouseArea.containsMouse ? Config.colors.negative : Config.colors.altBase
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 125
+                    }
+                }
                 MouseArea {
                     id: mouseArea
                     anchors.fill: parent
@@ -115,7 +88,10 @@ Rectangle {
                     width: 170
                     height: 50
                     standardButtons: Dialog.Ok | Dialog.Cancel
-                    onAccepted: btn.modelData.exec()
+                    onAccepted: {
+                        cmd.command = btn.modelData.command
+                        cmd.startDetached()
+                    }
                 }
                 Image {
                     anchors.centerIn: parent

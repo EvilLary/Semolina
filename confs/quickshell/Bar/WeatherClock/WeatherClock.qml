@@ -1,15 +1,37 @@
 import QtQuick
 import Quickshell
 import QtQuick.Layouts
-import "root:Libs"
+import "../../Libs"
+import "../../"
+import "../../Components" as C
 
 MouseArea {
     id: weather
+    required property var bar
     implicitWidth: childrenRect.width
-    onClicked: Weather.refresh()
+    onClicked: event => {
+        switch (event.button) {
+        case (Qt.LeftButton):
+            calendar.toggle()
+            event.accepted = true
+            break;
+        case (Qt.RightButton):
+            Weather.refresh()
+            event.accepted = true
+            break;
+        }
+    }
+    acceptedButtons: Qt.RightButton | Qt.LeftButton
     //hoverEnabled: true
 
-
+    C.Popup {
+        id: calendar
+        rootWindow: weather.bar
+        parentItem: weather
+        contentUrl: "root:/Bar/WeatherClock/CalendarView.qml"
+        popupHeight: 400
+        popupWidth: 750
+    }
     //Popup {
     //    id: weatherInfo
     //    rootWindow: weather.bar
@@ -50,12 +72,22 @@ MouseArea {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
-        source: Quickshell.iconPath(Weather.weatherData.weatherIcon,'weather-none-available')
+        source: Quickshell.iconPath(Weather.weatherData.weatherIcon, 'weather-none-available')
         sourceSize {
             width: 42
             height: 42
         }
         mipmap: true
+    }
+
+    // property string timeFormatted: Qt.locale("ar_SA").toString(clock.date, "ddd, dd MMM | hh:mm AP")
+    // property alias seconds: clock.seconds
+    // property alias minutes: clock.minutes
+    // property alias hours: clock.hours
+
+    SystemClock {
+        id: clock
+        precision: SystemClock.Minutes
     }
     ColumnLayout {
         id: column
@@ -66,13 +98,9 @@ MouseArea {
             leftMargin: 5
             verticalCenter: parent.verticalCenter
         }
-        //property string timeFormat: "hh:mm AP"
-        //property string dateFormat: "hh:mm AP - ddd, MMM dd"
         Text {
-            //text: Weather.weatherData.temperature + Weather.weatherData.temperatureUnit
-            //text: Qt.formatDate(Clock.time,root.dateFormat)
-            //text: Qt.formatDateTime(Clock.time,column.dateFormat)
-            text: Clock.timeFormatted
+            // text: Clock.timeFormatted
+            text: Qt.locale("ar_SA").toString(clock.date, "ddd, dd MMM | hh:mm AP")
             color: Config.colors.text
             lineHeight: 0
             renderType: Text.NativeRendering
@@ -81,14 +109,14 @@ MouseArea {
             Layout.fillWidth: true
             elide: Text.ElideRight
             font {
-                pointSize: 11
-                hintingPreference: Font.PreferNoHinting
+                pointSize: 12
+                //hintingPreference: Font.PreferNoHinting
                 weight: Font.Bold
             }
         }
         Text {
             //text: `${Weather.weatherData.windSpeed} ${Weather.weatherData.windSpeedUnit} , ${Weather.weatherData.windDirection} ${Weather.weatherData.windDirectionUnit}`
-            text: Weather.weatherData.temperature + Weather.weatherData.temperatureUnit + ", " + Weather.weatherData.weatherDescription
+            text: Weather.weatherData.temperature.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]) + Weather.weatherData.temperatureUnit + ", " + Weather.weatherData.weatherDescription
             color: Config.colors.text
             lineHeight: 0
             renderType: Text.NativeRendering
@@ -97,9 +125,9 @@ MouseArea {
             verticalAlignment: Qt.AlignVCenter
             elide: Text.ElideRight
             font {
-                weight: Font.Medium
-                hintingPreference: Font.PreferFullHinting
-                pointSize: 10
+                weight: Font.DemiBold
+                //hintingPreference: Font.PreferFullHinting
+                pointSize: 11
             }
         }
     }

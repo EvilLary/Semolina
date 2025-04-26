@@ -1,12 +1,13 @@
 import QtQuick.Layouts
 import QtQuick
-import "root:Libs"
-import "Mpris"
+//import "../Libs"
+//import "Mpris"
 import "Tasks"
 import "Indicators"
 import "Systray"
 import "MailBox"
-import "Weather"
+import "WeatherClock"
+import "../"
 
 BarWindow {
     id: root
@@ -16,15 +17,18 @@ BarWindow {
         bottom: true
         top: false
     }
-    height: 56
+    height: Config.barHeight
     RowLayout {
         id: centerItems
         anchors.centerIn: parent
         height: parent.height
+
         TaskManager {
             id: taskManager
-            //Layout.fillHeight: true
-            implicitHeight: 40
+            Layout.fillHeight: true
+            bar: root
+            Layout.leftMargin: 5
+            // implicitHeight: 45
         }
     }
 
@@ -63,17 +67,18 @@ BarWindow {
         }
         layoutDirection: Qt.LeftToRight
         spacing: 10
-        //ActiveTask {
-        //    id: activetask
-        //    Layout.fillHeight: true
-        //}
-        WeatherItem {
+        WeatherClock {
             id: weather
+            bar: root
             Layout.fillHeight: true
         }
-        //Music {
+        // ActiveTask {
+        //    id: activetask
+        //    Layout.fillHeight: true
+        // }
+        // Music {
         //    visible: MprisProvider.trackedPlayer != null
         //    Layout.fillHeight: true
-        //}
+        // }
     }
 }

@@ -1,47 +1,39 @@
 import QtQuick
-import "../../Libs"
 import "../../Components" as C
 import QtQuick.Controls
 
-Rectangle {
+C.OutRect {
     id: root
 
-    color: Config.colors.background
-    radius: Config.globalRadius
-    border {
-        width: 1
-        color: Qt.alpha(Config.colors.text,0.2)
-    }
+    signal closePopup
     C.TabBar {
         id: header
         anchors {
-            margins: 10
+            margins: 8
             top: parent.top
             right: parent.right
             left: parent.left
         }
-        model: ["Applications","Devices"]
+        model: ["تطبيقات", "صوتيات"]
         height: 46
         activeIndex: 0
         onActiveIndexChanged: {
             if (activeIndex == 0) {
                 //stackView.replace('root:Bar/Indicators/StreamsList.qml')
-                stackView.pop(null)
+                stackView.pop(null);
             } else if (activeIndex == 1) {
-                stackView.push('root:Bar/Indicators/DevicesList.qml')
+                stackView.push('./DevicesList.qml');
             }
         }
     }
-    Rectangle {
+    C.InnRect {
         id: mainView
-        color: Config.colors.altBackground
-        radius: Config.globalRadius
         anchors {
             top: header.bottom
             bottom: parent.bottom
             right: parent.right
             left: parent.left
-            margins: 10
+            margins: 8
         }
         clip: true
         StackView {
@@ -50,32 +42,7 @@ Rectangle {
                 fill: parent
                 margins: 8
             }
-            initialItem: 'root:Bar/Indicators/StreamsList.qml'
+            initialItem: './StreamsList.qml'
         }
-        //StackLayout {
-        //    id: stacks
-        //    currentIndex: header.activeIndex
-        //    anchors {
-        //        fill: parent
-        //        margins: 8
-        //    }
-        //
-        //    Loader {
-        //        id: streams
-        //        //active: true
-        //        active: this.StackLayout.isCurrentItem
-        //        source: "StreamsList.qml"
-        //        Layout.fillWidth: true
-        //        Layout.fillHeight: true
-        //    }
-        //    Loader {
-        //        id: devices
-        //        //active: true
-        //        active: this.StackLayout.isCurrentItem
-        //        source: "DevicesList.qml"
-        //        Layout.fillWidth: true
-        //        Layout.fillHeight: true
-        //    }
-        //}
     }
 }

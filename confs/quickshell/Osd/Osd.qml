@@ -2,7 +2,8 @@ pragma ComponentBehavior: Bound
 
 import Quickshell
 import Quickshell.Wayland
-import "root:Libs"
+import "../Libs"
+import Quickshell.Io
 import QtQuick
 
 Scope {
@@ -13,6 +14,15 @@ Scope {
     property string osdTexts;
     property bool barVisibility: true;
 
+    IpcHandler {
+        target: "ipc"
+        function osdmsg(bodyText: string, iconPath: string): void {
+            root.iconSource = iconPath
+            root.osdTexts = bodyText
+            root.barVisibility = false
+            root.loadOsd()
+        }
+    }
     LazyLoader {
         id: loader
         active: false

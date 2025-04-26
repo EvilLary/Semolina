@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
-import "../Libs"
+import "../"
 import "../Components"
 
 ListView {
@@ -9,7 +9,7 @@ ListView {
     spacing: 8
     //model: Clipboard.texts.filter(entry => entry != null && entry.content.toLowerCase().includes(searchBar.text))
     model: ScriptModel {
-        values: Clipboard.texts
+        values: clipboard.texts
         .filter(entry => entry != null && entry.content.toLowerCase().includes(searchBar.text.toLowerCase()))
         //onValuesChanged: list.currentIndex = 0
     }
@@ -18,8 +18,8 @@ ListView {
     Keys.onTabPressed: list.incrementCurrentIndex()
     Keys.onBacktabPressed: list.decrementCurrentIndex()
     Keys.onReturnPressed: {
-        Clipboard.copyItem(list.currentItem.modelData.id)
-        IPC.clipboardToggle()
+        clipboard.copyItem(list.currentItem.modelData.id)
+        // IPC.clipboardToggle()
     }
     Keys.forwardTo: searchBar
 
@@ -41,8 +41,8 @@ ListView {
             list.currentIndex = entry.index
         }
         onClicked: {
-            Clipboard.copyItem(entry.modelData.id)
-            IPC.clipboardToggle()
+            clipboard.copyItem(entry.modelData.id)
+            // IPC.clipboardToggle()
         }
         Text {
             anchors.fill: parent
@@ -81,8 +81,8 @@ ListView {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    Clipboard.deleteItem(entry.modelData.id)
-                    Clipboard.texts.splice(index,1)
+                    clipboard.deleteItem(entry.modelData.id)
+                    clipboard.texts.splice(index,1)
                 }
             }
         }

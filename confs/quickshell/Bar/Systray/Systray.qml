@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+// import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.SystemTray
 
@@ -22,8 +23,8 @@ MouseArea {
 
         Image {
             source: Quickshell.iconPath('arrow-left')
-            width: 46
-            height: 46
+            width: 23
+            height: 23
             anchors {
                 centerIn: parent
             }
@@ -36,13 +37,13 @@ MouseArea {
         }
     }
     function reveal(): void {
-        revealAnimation.to = (revealer.width + row.width + row.anchors.rightMargin)
-        row.visible = true
-        revealAnimation.restart()
+        revealAnimation.to = (revealer.width + row.width + row.anchors.rightMargin);
+        row.visible = true;
+        revealAnimation.restart();
     }
     function hide(): void {
-        revealAnimation.to = (revealer.width)
-        revealAnimation.restart()
+        revealAnimation.to = (revealer.width);
+        revealAnimation.restart();
     }
     SmoothedAnimation {
         id: revealAnimation
@@ -52,11 +53,15 @@ MouseArea {
         easing.type: Easing.Linear
         onFinished: {
             if (root.implicitWidth == revealer.width) {
-                row.visible = false
-                root.implicitWidth = Qt.binding(function() { return (revealer.width)})
+                row.visible = false;
+                root.implicitWidth = Qt.binding(function () {
+                    return (revealer.width);
+                });
             }
             if (row.visible) {
-                root.implicitWidth = Qt.binding(function() { return (revealer.width + row.width + row.anchors.rightMargin) })
+                root.implicitWidth = Qt.binding(function () {
+                    return (revealer.width + row.width + row.anchors.rightMargin);
+                });
             }
         }
     }
@@ -76,16 +81,84 @@ MouseArea {
             SystrayItem {
                 id: item
                 required property var modelData
-                iconSource: modelData.icon
+                // Component.onCompleted: print(this.modelData.icon)
+                iconSource: {
+                    if (modelData.icon.includes("?path=")) {
+                        const [name, path] = modelData.icon.split("?path=");
+                        const icon = name.replace("image://icon/", "");
+                        return Qt.resolvedUrl(path + "/" + icon);
+                    }
+                    return modelData.icon
+                }
 
-                onRightClick: if (modelData.hasMenu) openMenu()
+                // Popup {
+                //     id: popup
+                //     // delay: 100
+                //     // // text:  item.modelData.tooltipTitle + "\n" + item.modelData.tooltipDescription
+                //     // // visible: item.containsMouse || this.
+                //     // timeout: 10000
+                //
+                //     Text {
+                //         anchors.centerIn: parent
+                //         text: "fdffdfsdfsdfsdfsdfsdf\nsdfsdfsdf\nsdfsdfsdf\ndsf"
+                //     }
+                //     exit: Transition {
+                //         SequentialAnimation {
+                //             PauseAnimation {
+                //                 duration: 200
+                //             }
+                //             NumberAnimation {
+                //                 property: "opacity"
+                //                 from: 1.0
+                //                 to: 0.0
+                //             }
+                //         }
+                //     }
+                //     popupType: Popup.Window
+                //     bottomMargin: 100
+                //     // y: -
+                //     // bottomPadding: 1000
+                // }
+                // Timer {
+                //     id: timer
+                //     interval: 350
+                //     repeat: false
+                //     onTriggered: {
+                //         if (popup.visible) {
+                //             popup.close();
+                //         } else {
+                //             popup.open();
+                //         }
+                //     }
+                // }
+                // onEntered: {
+                //     // popup.open()
+                //     if (popup.visible) {
+                //         timer.stop;
+                //     } else {
+                //         timer.restart();
+                //     }
+                // }
+                // onExited: {
+                //     // if ()
+                //     // timer.stop();
+                //     if (popup.visible) {
+                //         timer.restart();
+                //     } else {
+                //         timer.stop();
+                //     }
+                // }
+                onRightClick: if (modelData.hasMenu)
+                    openMenu()
                 //Steam reports that it has activations but when clicking on it it complains about "no such method "Activate""
-                onLeftClick: if (!modelData.onlyMenu && modelData.id != "steam") modelData.activate()
-                onMiddleClick: if (!modelData.onlyMenu) modelData.secondaryActivate()
+                onLeftClick: if (!modelData.onlyMenu && modelData.id != "steam")
+                    modelData.activate()
+                onMiddleClick: if (!modelData.onlyMenu)
+                    modelData.secondaryActivate()
                 function openMenu(): void {
-                    const window = QsWindow.window
-                    const coords = window.contentItem.mapFromItem(item,15,15)
-                    modelData.display(window,coords.x,coords.y)
+                    const window = QsWindow.window;
+                    const coords = window.contentItem.mapFromItem(item, 15, 15);
+                    modelData.display(window, coords.x, coords.y);
                 }
             }
         }

@@ -1,7 +1,7 @@
 import QtQuick
-import '../Mpris'
-import '../../Libs'
-import '../../Components'
+// import "../../Libs"
+// import '../../Components'
+import "../../Widgets"
 import Quickshell.Widgets
 
 Item {
@@ -52,9 +52,8 @@ Item {
         }
         height: 150
     }
-    Loader {
+    MprisWidget {
         id: mprisLoader
-        active: MprisProvider.trackedPlayer != null
         anchors {
             right: parent.right
             left: parent.left
@@ -62,10 +61,20 @@ Item {
             bottomMargin: 8
         }
         height: 170
-        sourceComponent: MprisWidget {}
     }
+    // Loader {
+    //     id: mprisLoader
+    //     active: MprisProvider.trackedPlayer != null
+    //     anchors {
+    //         right: parent.right
+    //         left: parent.left
+    //         bottom: quickSettings.top
+    //         bottomMargin: 8
+    //     }
+    //     height: 170
+    //     sourceComponent: MprisWidget {}
+    // }
     WeatherInfo {
-
         anchors {
             top: powerButtons.bottom
             right: powerButtons.right
@@ -73,26 +82,6 @@ Item {
             bottom: mprisLoader.top
             topMargin: 8
             bottomMargin: 8
-        }
-    }
-    Rectangle {
-        visible: !mprisLoader.active
-        height: 180
-        anchors {
-            right: parent.right
-            left: parent.left
-            bottom: quickSettings.top
-            bottomMargin: 8
-        }
-        radius: Config.globalRadius
-        color: Config.colors.altBackground
-        Text {
-            anchors.centerIn: parent
-            text: '󰝛'
-            color: Qt.alpha(Config.colors.text,0.4)
-            font {
-                pointSize: 72
-            }
         }
     }
 }

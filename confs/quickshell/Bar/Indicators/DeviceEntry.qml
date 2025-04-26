@@ -1,6 +1,6 @@
 import QtQuick
-import "root:Libs"
-import "root:Components"
+import "../../Components"
+import "../../"
 import Quickshell.Services.Pipewire
 import QtQuick.Layouts
 
@@ -8,22 +8,29 @@ Rectangle {
     id: entry
 
     required property PwNode node
-    property alias icon: slider.iconSource
-    PwObjectTracker {objects: [entry.node]}
+    PwObjectTracker {
+        objects: [entry.node]
+    }
+
+    color: this.isDefault ? Qt.darker(Config.colors.accent, 1.5) : Qt.darker(Config.colors.altBase, 2)
     radius: Config.globalRadius
     Behavior on color {
         ColorAnimation {
             duration: 150
         }
     }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         onClicked: {
-            if (entry.node.isSink) {
-                Pipewire.preferredDefaultAudioSink = entry.node
-            } else {
-                Pipewire.preferredDefaultAudioSource = entry.node
+            // print(JSON.stringify(entry.node, null, '\t'));
+            if (entry.node.ready) {
+                if (entry.node.isSink) {
+                    Pipewire.preferredDefaultAudioSink = entry.node;
+                } else {
+                    Pipewire.preferredDefaultAudioSource = entry.node;
+                }
             }
         }
     }
@@ -48,15 +55,24 @@ Rectangle {
             value: entry.node.audio.volume
             throbberColor: entry.node.audio.muted ? Config.colors.negative : Config.colors.text
             iconSize: 30
+            iconSource: entry.icon
             onScrollUp: {
-                const newVolume = entry.node.audio.volume + 0.05
-                entry.node.audio.volume = Math.min(newVolume,1)
+                if (!entry.node.ready)
+                    return;
+                const newVolume = entry.node.audio.volume + 0.05;
+                entry.node.audio.volume = Math.min(newVolume, 1);
             }
             onScrollDown: {
-                const newVolume = entry.node.audio.volume - 0.05
-                entry.node.audio.volume = Math.max(newVolume,0)
+                if (!entry.node.ready)
+                    return;
+                const newVolume = entry.node.audio.volume - 0.05;
+                entry.node.audio.volume = Math.max(newVolume, 0);
             }
-            onLeftClick: entry.node.audio.muted = !entry.node.audio.muted
+            onLeftClick: {
+                if (!entry.node.ready)
+                    return;
+                entry.node.audio.muted = !entry.node.audio.muted;
+            }
         }
         ColumnLayout {
             Layout.fillWidth: true
@@ -64,7 +80,7 @@ Rectangle {
             Layout.fillHeight: true
             spacing: 5
             Text {
-                text: entry.node.nickname
+                text: entry.node.nickname || entry.node.description
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
                 Layout.fillWidth: true
