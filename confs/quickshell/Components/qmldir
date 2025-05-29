@@ -1,0 +1,5 @@
+module Components
+Popup 1.0 Popup.qml
+CircularSlider 1.0 CircularSlider.qml
+NotificationPopup 1.0 NotificationPopup.qml
+TabBar 1.0 TabBar.qml

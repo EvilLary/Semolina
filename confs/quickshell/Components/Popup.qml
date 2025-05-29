@@ -1,149 +1,166 @@
 pragma ComponentBehavior: Bound
 
-import Quickshell
 import QtQuick
+import Quickshell
 import Quickshell.Hyprland
 
-Scope {
+QtObject {
     id: root
-
-    required property QsWindow rootWindow
+    required property url itemUrl
     required property Item parentItem
+    required property QsWindow bar
+    required property int height
+    required property int width
 
-    property alias active: loader.active
-    property string contentUrl
-    property Component contentItem
-    //property bool sideSlide: false
-    property int popupWidth: 450
-    property int popupHeight: 300
-    property int xcoords
-    property int ycoords
-    property int offsetX: 0
-    property int offsetY: 0
+    // property int xMargin: 0
+    property double yMargin: 0
 
-
-    readonly property alias isOpen: loader.active
-    signal close
     signal closed
-
-    function open(): void {
-        const coords = rootWindow.contentItem.mapFromItem(parentItem, 0, 0);
-        root.xcoords = coords.x;
-        root.ycoords = coords.y;
-        loader.active = true;
-    }
+    // signal close
     function toggle(): void {
         if (loader.active) {
-            root.close();
+            // root.close();
         } else {
-            root.open();
+            loader.active = true;
         }
     }
-    LazyLoader {
+    readonly property LazyLoader loader: LazyLoader {
         id: loader
         PopupWindow {
             id: popup
-
+            implicitWidth: root.width + 12
+            implicitHeight: root.height
+            visible: true
+            color: "transparent"
+            anchor.window: root.bar
+            HyprlandWindow.opacity: 0
             anchor {
-                window: root.rootWindow
-                rect.x: {
-                    const hl_width = root.popupWidth / 2;
-                    const pre_calc_x = (root.xcoords) - (root.popupWidth / 2) + root.offsetX;
-                    const xmargins = 15;
-                    if (root.xcoords < root.rootWindow.width / 2) {
-                        if (root.xcoords < hl_width) {
-                            return xmargins;
+                // edges: Edges.Top | Edges.Right
+                // gravity: Edges.Bottom | Edges.Left
+                rect.x: -(root.width + 12)
+                rect.y: {
+                    const coords = root.bar.contentItem.mapFromItem(root.parentItem, 0, 0);
+                    const ymargins = 6;
+                    const height = root.height;
+                    const hl_height = height / 2;
+                    const barHeight = root.bar.height;
+                    const yoffset = root.yMargin;
+                    const pre_calc_y = (coords.y) - (height / 2) + yoffset;
+                    if (coords.y < barHeight / 2) {
+                        if (coords.y < hl_height) {
+                            return ymargins;
                         } else {
-                            return pre_calc_x;
+                            return pre_calc_y;
                         }
                     } else {
-                        const remaining = root.rootWindow.width - root.xcoords;
-                        if (remaining > hl_width) {
-                            return pre_calc_x;
+                        const remaining = barHeight - coords.x;
+                        if (remaining > hl_height) {
+                            return pre_calc_y;
                         } else {
-                            const rectx = root.rootWindow.width - root.popupWidth - xmargins;
-                            return rectx;
+                            return barHeight - height - ymargins;
                         }
                     }
                 }
-                rect.y: -((popup.height) + 5)
-                //gravity: Edges.Top | Edges.Right
-                //edges: Edges.Bottom | Edges.Right
             }
-            //surfaceFormat {
-            //    opaque: true
-            //}
-            width: root.popupWidth
-            height: root.popupHeight
-            visible: true
-            color: "transparent"
-            HyprlandWindow.opacity: 0
-
+            // Connections {
+            //     target: root
+            //     function onClose(): void {
+            //         popup.hideAnimation();
+            //     }
+            // }
             Connections {
-                target: root
-                enabled: true
+                target: body.item
                 ignoreUnknownSignals: true
-                function onClose(): void {
-                    popup.hideAnimation();
+                function onClosePopup() {
+                    popup.hideAnimation()
                 }
             }
             HyprlandFocusGrab {
-                id: grap
+                id: grab
                 windows: [popup]
                 onCleared: popup.hideAnimation()
             }
             Loader {
-                id: popupBody
-                anchors.fill: parent
-                //source: root.contentUrl
-                //sourceComponent: root.contentItem
-                layer.enabled: true
+                id: body
+                // anchors.fill: parent
                 focus: true
+                width: parent.width - 6
+                height: parent.height
+                // x: this.width
                 Keys.onEscapePressed: popup.hideAnimation()
-                Keys.forwardTo: [popupBody.item]
-                Component.onCompleted: {
-                    if (root.contentUrl) {
-                        popupBody.setSource(root.contentUrl);
-                    } else {
-                        popupBody.sourceComponent = root.contentItem;
-                    }
-                }
+                source: root.itemUrl
             }
-            Connections {
-                target: popupBody.item
-                function onClosePopup(): void {
-                    popup.hideAnimation()
+            ParallelAnimation {
+                id: startAnim
+                NumberAnimation {
+                    target: popup
+                    property: "HyprlandWindow.opacity"
+                    from: 0
+                    to: 1
+                    duration: 150
+                    easing.type: Easing.Linear
                 }
+                // NumberAnimation {
+                //     target: body
+                //     property: "x"
+                //     from: body.width
+                //     to: 0
+                //     duration: 150
+                //     easing.type: Easing.Linear
+                // }
             }
-            NumberAnimation {
-                id: opacityAnimator
-                target: popup
-                property: "HyprlandWindow.opacity"
-                duration: 150
-                easing.type: Easing.Linear
+
+            ParallelAnimation {
+                id: hideAnim
+                NumberAnimation {
+                    target: popup
+                    property: "HyprlandWindow.opacity"
+                    from: 1
+                    to: 0
+                    duration: 150
+                    easing.type: Easing.Linear
+                }
+                // NumberAnimation {
+                //     target: body
+                //     property: "x"
+                //     from: 0
+                //     to: body.width
+                //     duration: 150
+                //     easing.type: Easing.Linear
+                // }
                 onFinished: {
-                    if (popup.HyprlandWindow.opacity == 0) {
-                        root.closed();
-                        loader.active = false;
-                    }
+                    root.closed();
+                    loader.active = false;
                 }
             }
+            // NumberAnimation {
+            //     id: anim
+            //     target: popup
+            //     property: "HyprlandWindow.opacity"
+            //     duration: 200
+            //     easing.type: Easing.InOutQuad
+            //     onFinished: {
+            //         if (popup.HyprlandWindow.opacity === 0) {
+            //             root.closed();
+            //             loader.active = false;
+            //         }
+            //     }
+            // }
             function spawnAnimation(): void {
-                opacityAnimator.from = 0;
-                opacityAnimator.to = 1;
-                opacityAnimator.restart();
-                grap.active = true;
+                startAnim.start();
+                // anim.to = 1;
+                // anim.from = 0;
+                // anim.restart();
+                grab.active = true;
             }
             function hideAnimation(): void {
-                popupBody.focus = false;
-                opacityAnimator.from = 1;
-                opacityAnimator.to = 0;
-                opacityAnimator.restart();
-                grap.active = false;
+                grab.active = false;
+                hideAnim.start();
+                // anim.to = 0;
+                // anim.from = 1;
+                // anim.restart();
             }
-            Component.onCompleted: {
-                popup.spawnAnimation();
-            }
+            Component.onCompleted: this.spawnAnimation()
         }
     }
 }

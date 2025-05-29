@@ -1,47 +1,21 @@
 //@ pragma UseQApplication
-pragma ComponentBehavior: Bound
 
-import QtQuick
 import Quickshell
-import "Wallpaper"
+import QtQuick
+import "Services"
 import "Bar"
-import "Osd"
-import "Notification"
-import "Launcher"
+// import "Config"
 import "Clipboard"
-import "./Libs"
-// import "GameOverlay"
-// import "WindowSwitcher"
-// import "Emojier"
-// import "Screenshot"
+// import "Notifications"
 
 ShellRoot {
-    settings {
-        watchFiles: true
+    id: root
+    Component.onCompleted: {
+        Osd.init();
+        Audio.init();
+        Notifications.init();
+        Misc.init_apps();
     }
-    Variants {
-        model: Quickshell.screens
-
-        //INFO
-        Scope {
-            id: scope
-            required property ShellScreen modelData
-            Wallpaper {
-                screen: scope.modelData
-            }
-            BottomBar {
-                id: bottom
-                screen: scope.modelData
-            }
-        }
-    }
-
-    Osd {}
+    Bar {}
     ClipboardLayer {}
-    NotificationLayer {}
-    Launcher {}
-    //Switcher {}
-    //Emojier {}
-    // Screenshot {}
-    Component.onCompleted: [Stuff.init_apps()]
 }

@@ -2,24 +2,27 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import "../"
+import "../Config"
 
-Rectangle {
+Item {
     id: root
-    color: Config.colors.altBackground
-    radius: Config.globalRadius
+    // color: Colors.background
+    // radius: Stuff.radius
 
-    required property var model
+    required property list<string> model
     property int activeIndex: 0
     property int textSize: 14
 
     RowLayout {
         anchors {
-            fill: parent
-            margins: 5
+            centerIn: parent
         }
+        width: Math.max(parent.width, 10)
+        height: Math.max(parent.height, 10)
         Repeater {
-            model: root.model
+            id: repeater
+            // model: root.model
+            Component.onCompleted: this.model = root.model
 
             Rectangle {
                 id: rect
@@ -27,15 +30,17 @@ Rectangle {
                 required property var modelData
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                property bool active: root.activeIndex == index
+                Layout.minimumWidth: 1
+                Layout.minimumHeight: 1
+                readonly property bool active: root.activeIndex == index
                 MouseArea {
                     id: mouseArea
                     anchors.fill: parent
                     onClicked: root.activeIndex = rect.index
                     hoverEnabled: true
                 }
-                radius: Config.globalRadius
-                color: (this.active) ? Config.colors.accent : (mouseArea.containsMouse ? Config.colors.altBase : root.color)
+                radius: Stuff.radius
+                color: (this.active) ? Colors.accent : (mouseArea.containsMouse ? Qt.lighter(Colors.background, 1.5) : Colors.background)
                 Behavior on color {
                     ColorAnimation {
                         easing.type: Easing.Linear
@@ -47,12 +52,14 @@ Rectangle {
                     text: rect.modelData
                     verticalAlignment: Qt.AlignVCenter
                     horizontalAlignment: Qt.AlignHCenter
-                    color: (parent.active) ? Config.colors.text : Qt.alpha(Config.colors.text,0.3)
+                    color: (parent.active) ? Colors.text : Qt.alpha(Colors.text,0.3)
                     renderType: Text.NativeRendering
+                    textFormat: Text.PlainText
                     fontSizeMode: Text.Fit
                     font {
                         pixelSize: root.textSize
                         weight: Font.Bold
+                        kerning: false
                     }
                 }
             }

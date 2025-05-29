@@ -1,177 +1,128 @@
 return {
-    'neovim/nvim-lspconfig',
-
+    "neovim/nvim-lspconfig",
     dependencies = {
-        { 'williamboman/mason.nvim', config = true },
-        'williamboman/mason-lspconfig.nvim',
-        'WhoIsSethDaniel/mason-tool-installer.nvim',
-        -- { 'RaafatTurki/corn.nvim', opts = {
-        --     scope = "file",
-        --     border_style = "none"
-        -- }},
         { 'j-hui/fidget.nvim', opts = {} },
-        'hrsh7th/cmp-nvim-lsp',
     },
-    opts = {
-        diagnostics = {
-            virtual_text = false,
-            virtual_lines = false,
-        },
-    },
+    lazy = false,
     config = function()
+        vim.diagnostic.config({
+            virtual_text = {
+                source = "if_many", -- "if_many", "always", "single"
+                prefix = '● ', -- '●', '▎', 'x'
+            },
+            virtual_lines = false,
+            severity_sort = true,
+            signs = {
+                text = {
+                    [vim.diagnostic.severity.ERROR] = " ",
+                    [vim.diagnostic.severity.WARN] = " ",
+                    [vim.diagnostic.severity.INFO] = " ",
+                    [vim.diagnostic.severity.HINT] = " 󰌵"
+                }
+            },
+            float = {
+                border = "single",
+                -- border = { "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" },
+                source = "always", -- Or "if_many", "always", "single",
+            },
+            underline = true,
+        })
+
+        vim.lsp.enable("qmlls")
+        vim.lsp.enable("clangd")
+        vim.lsp.enable("rust_analyzer")
+        vim.lsp.enable("lua_ls")
+        -- vim.lsp.enable("csharp_ls")
+
         vim.api.nvim_create_autocmd('LspAttach', {
-            group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+            --group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
             callback = function(event)
                 local map = function(keys, func, desc, mode)
                     mode = mode or 'n'
                     vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
                 end
 
-                map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+                local client = vim.lsp.get_client_by_id(event.data.client_id)
+                local telescope = require("telescope.builtin")
+                map('gd', telescope.lsp_definitions, '[G]oto [D]efinition')
 
                 -- Find references for the word under your cursor.
-                map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-
+                map('gr', telescope.lsp_references, '[G]oto [R]eferences')
                 -- Jump to the implementation of the word under your cursor.
-                map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-
+                map('gI', telescope.lsp_implementations, '[G]oto [I]mplementation')
+                --
                 -- Jump to the type of the word under your cursor.
                 --  the definition of its *type*, not where it was *defined*.
-                map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+                map('<leader>D', telescope.lsp_type_definitions, 'Type [D]efinition')
 
                 -- Fuzzy find all the symbols in your current document.
-                map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+                map('<leader>ds', telescope.lsp_document_symbols, '[D]ocument [S]ymbols')
 
                 -- Fuzzy find all the symbols in your current workspace.
-                map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+                map('<leader>ws', telescope.lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
-                -- Rename the variable under your cursor.
-                map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+                map('<leader>dL', telescope.diagnostics, "[D]iagnostic [L]ist")
 
-                -- Execute a code action, usually your cursor needs to be on top of an error
-                map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+                -- if client and client:supports_method("textDocument/foldingRange") then
+                --     local win = vim.api.nvim_get_current_win()
+                --     vim.wo[win][0].foldmethod = "expr"
+                --     vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
+                -- end
 
-                -- WARN: This is not Goto Definition, this is Goto Declaration.
-                --  For example, in C this would take you to the header.
-                map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+                -- inly hints
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+                    map("<leader>th", function()
+                        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
+                    end, "[T]oggle Inlay [H]ints")
+                end
 
-                local client = vim.lsp.get_client_by_id(event.data.client_id)
-                if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-                    local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-                    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_rename) then
+                    map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+                end
+
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_declaration) then
+                    map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+                end
+
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_hover) then
+                    map("K", function() vim.lsp.buf.hover { border = "single", max_height = 25, max_width = 120 } end,
+                        "Lsp hover action")
+                end
+
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_codeAction) then
+                    map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { 'n', 'x' })
+                end
+
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_formatting) then
+                    map("<leader>fm", vim.lsp.buf.format, "[F]ormat current file")
+                end
+
+                -- if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_) then
+                --
+                -- end
+                if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+                    local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
+                    vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                         buffer = event.buf,
                         group = highlight_augroup,
                         callback = vim.lsp.buf.document_highlight,
                     })
 
-                    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+                    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
                         buffer = event.buf,
                         group = highlight_augroup,
                         callback = vim.lsp.buf.clear_references,
                     })
 
-                    vim.api.nvim_create_autocmd('LspDetach', {
-                        group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+                    vim.api.nvim_create_autocmd("LspDetach", {
+                        group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
                         callback = function(event2)
                             vim.lsp.buf.clear_references()
-                            vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+                            vim.api.nvim_clear_autocmds { group = "kickstart-lsp-highlight", buffer = event2.buf }
                         end,
                     })
                 end
-                if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-                    map('<leader>th', function()
-                        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-                    end, '[T]oggle Inlay [H]ints')
-                end
             end,
         })
-        local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
-        local servers = {
-            clangd = {},
-            -- slint_lsp = {
-            --   filetypes =   { "slint" },
-            -- },
-            rust_analyzer = {
-                settings = {
-                    ['rust-analyzer'] = {
-                        diagnostics = {
-                            enable = true,
-                        },
-                        -- cargo = {
-                        --     allFeatures = true,
-                        -- },
-                        -- inlayHints = {
-                        --     enable = true,
-                        -- },
-                    },
-                },
-
-            },
-
-        }
-        require('mason').setup()
-        require("lspconfig").qmlls.setup({
-            cmd = {'/usr/bin/qmlls6'},
-            -- root_dir = function(fname)
-            --     return vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
-            -- end,
-        })
-        local ensure_installed = vim.tbl_keys(servers or {})
-        vim.list_extend(ensure_installed, {
-            'rust-analyzer',
-        })
-        require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-        require('mason-lspconfig').setup {
-            handlers = {
-                function(server_name)
-                    local server = servers[server_name] or {}
-                    server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-                    require('lspconfig')[server_name].setup(server)
-                end,
-            },
-        }
-
-        -- local signs = { Error = "", Warn = "", Hint = "󰌵", Info = "" }
-        -- for type, icon in pairs(signs) do
-        --     local hl = "DiagnosticSign" .. type
-        --     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-        -- end
-        vim.diagnostic.config({
-            virtual_text = false,
-            -- virtual_text = {
-            --     enabled = false,
-            --     -- source = "always",  -- Or "if_many"
-            --     prefix = '● ', -- Could be '■', '▎', 'x'
-            -- },
-            virtual_lines = true,
-            severity_sort = true,
-            float = {
-                source = "always",  -- Or "if_many"
-            },
-        })
-        -- open diagnostics on hover
-        -- vim.api.nvim_create_autocmd({ "CursorHold" }, {
-        --     pattern = "*",
-        --     callback = function()
-        --         for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-        --             if vim.api.nvim_win_get_config(winid).zindex then
-        --                 return
-        --             end
-        --         end
-        --         vim.diagnostic.open_float({
-        --             scope = "cursor",
-        --             focusable = false,
-        --             close_events = {
-        --                 "CursorMoved",
-        --                 "CursorMovedI",
-        --                 "BufHidden",
-        --                 "InsertCharPre",
-        --                 "WinLeave",
-        --             },
-        --         })
-        --     end
-        -- })
     end,
 }

@@ -1,113 +1,105 @@
 #!/usr/bin/env bash
 
-GsrStatus () {
+GsrStatus() {
     if [ ! -f /tmp/gsr-$1 ]; then
         echo "false"
         return 0
-    else 
+    else
         echo "true"
         return 1
     fi
-    #if ps -p $(cat /tmp/gsr-$1 2> /dev/null) &> /dev/null; then
-    #    echo 'true'
-    #    return 1
-    #else
-    #    echo 'false'
-    #    return 0
-    #fi
 }
 
-StopGsr () {
+StopGsr() {
     kill -SIGINT $(cat /tmp/gsr-$1)
     rm /tmp/gsr-$1
 }
 
-StartRecording () {
+StartRecording() {
     rm $XDG_CACHE_HOME/gsr-record.log
-    source "${XDG_CONFIG_HOME:-$HOME/.config}/gpu-screen-recorder.env"
+    local OUTPUTDIR="$HOME/Videos/Replays/Desktop"
+    local SCRIPT_LOCATION="/home/spicy/.local/bin/replay_organizer"
     local DATE=$(date +"%Y-%m-%d_%H:%M:%S")
     gpu-screen-recorder -v no \
-        -w screen \
-        -c $RECORDING_CONTAINER \
-        -bm $RECORDING_BITRATE_MODE \
-        -q ultra \
-        -k $RECORDING_CODEC \
-        -fm $RECORDING_FRAMERATE_MODE \
-        -ac $AUDIO_CODEC \
+        -w "portal" \
+        -c "mp4" \
+        -bm "cbr" \
+        -q "15000" \
+        -f "60" \
+        -fm "cfr" \
+        -k "h264" \
+        -ac "opus" \
         -a "default_output" \
-        -f "$FRAMERATE" \
+        -cr "full" \
+        -cursor "yes" \
         -o "$OUTPUTDIR/../../Recordings/Recording_$DATE.mp4" \
-        -cr full \
-        -cursor $CURSOR_VISIBITLY \
-        -sc $SCRIPT_LOCATION &> $XDG_CACHE_HOME/gsr-record.log & disown
+        -sc $SCRIPT_LOCATION &> $XDG_CACHE_HOME/gsr-record.log &
+    disown
 
-    echo $! > /tmp/gsr-record
+    echo $! >/tmp/gsr-record
 }
 
-StartBuffer () {
+StartBuffer() {
     rm $XDG_CACHE_HOME/gsr-buffer.log
-    source "${XDG_CONFIG_HOME:-$HOME/.config}/gpu-screen-recorder.env"
-    gpu-screen-recorder -v no \
-        -w $WINDOW \
-        -c $CONTAINER \
-        -bm $BITRATE_MODE \
-        -q $QUALITY \
-        -k $CODEC \
-        -fm $FRAMERATE_MODE \
-        -ac $AUDIO_CODEC \
-        -a "default_output" \
-        -f "$FRAMERATE" \
-        -r $REPLAYDURATION \
-        -o "$OUTPUTDIR" \
-        -cr "full" \
-        -cursor $CURSOR_VISIBITLY \
-        -restart-replay-on-save "yes" \
-        -sc "$SCRIPT_LOCATION" &> $XDG_CACHE_HOME/gsr-buffer.log & disown
-    echo $! > /tmp/gsr-buffer
+    local OUTPUTDIR="$HOME/Videos/Replays/Desktop"
+    local SCRIPT_LOCATION="/home/spicy/.local/bin/replay_organizer"
+    gpu-screen-recorder \
+        -v no \
+        -w screen \
+        -f 60 \
+        -bm cbr \
+        -q 25000 \
+        -c mkv \
+        -r 30 \
+        -a default_output \
+        -ac opus \
+        -k hevc \
+        -o "$HOME/Videos/Replays/Desktop" \
+        -sc $SCRIPT_LOCATION &> $XDG_CACHE_HOME/gsr-buffer.log &
+    disown
+    echo $! >/tmp/gsr-buffer
 }
 
 Notify() {
 
     case $XDG_CURRENT_DESKTOP in
-        KDE)
-            qdbus org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText "keyframe-record" "$1"
+    KDE)
+        qdbus6 org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText "keyframe-record" "$1"
         ;;
-        Hyprland)
-            qs ipc -c new call ipc osdmsg "$1" "gpu-screen-recorder"
-            # qs -c new msg ipc osdmsg "$1" "gpu-screen-recorder"
+    Hyprland)
+        qs -c shell ipc call osd osdmsg "$1" "keyframe-record"
         ;;
-        *)
-            notify-send -h string:x-canonical-private-synchronous:gsr -a "GSR" "GSR" "$1" -u low
+    *)
+        notify-send -h string:x-canonical-private-synchronous:gsr -a "GSR" "GSR" "$1" -u low
         ;;
     esac
 
 }
 case $1 in
-    toggle)
-        if GsrStatus "buffer"; then
-            StartBuffer
-            Notify "GSR started"
-        else
-            StopGsr "buffer"
-            Notify "GSR stopped"
-        fi
+toggle)
+    if GsrStatus "buffer"; then
+        StartBuffer
+        Notify "GSR started"
+    else
+        StopGsr "buffer"
+        Notify "GSR stopped"
+    fi
     ;;
-    save)
-        kill -SIGUSR1 $(cat /tmp/gsr-buffer)
+save)
+    kill -SIGUSR1 $(cat /tmp/gsr-buffer)
     ;;
-    record)
-        if GsrStatus "record"; then
-            StartRecording
-            Notify "Recoding started"
-        else
-            StopGsr "record"
-        fi
+record)
+    if GsrStatus "record"; then
+        StartRecording
+        Notify "Recoding started"
+    else
+        StopGsr "record"
+    fi
     ;;
-    status)
-        echo "{\"recording\":$(GsrStatus 'record'),\"buffer\":$(GsrStatus 'buffer')}"
+status)
+    echo "{\"recording\":$(GsrStatus 'record'),\"buffer\":$(GsrStatus 'buffer')}"
     ;;
-    *)
-        exit 1
+*)
+    exit 1
     ;;
 esac
-

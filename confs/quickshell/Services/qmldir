@@ -1,0 +1,7 @@
+module Services
+singleton Audio 1.0 Audio.qml
+singleton Osd 1.0 Osd.qml
+singleton Brightness 1.0 Brightness.qml
+singleton Notifications 1.0 Notifications.qml
+singleton Misc 1.0 Misc.qml
+TaskManager 1.0 TaskManager.qml

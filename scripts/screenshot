@@ -4,52 +4,53 @@
 #I Know, It's better to check if this dir exits but......
 Screenshot_Dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
 DATE=$(date +"%Y-%m-%d_%H:%M:%S")
+Screenshot="$Screenshot_Dir/Screenshot_$DATE.jpeg"
 
 send_notification() {
 
-    case $(notify-send -u normal --app-name "Screenshot" "Screenshot Saved" -i "spectacle" --action view-preview="View" --action edit="Edit" --action delete="Delete" --hint STRING:image-path:"$Screenshot_Dir/Screenshot_$DATE.png" ) in
-        view-preview)
-            xdg-open "$Screenshot_Dir/Screenshot_$DATE.png" & disown
+    case $(notify-send -u normal --app-name "تصوير شاشة" "حفظت الصورة" -i "spectacle" --action view-preview="افتح" --action edit-entry-symbolic="عدل" --action delete-symbolic="احذف" --hint STRING:image-path:"$Screenshot") in
+    view-preview)
+        uwsm app -S both -- xdg-open "$Screenshot" &>/dev/null &
+        disown
         ;;
-        delete)
-            rm "$Screenshot_Dir/Screenshot_$DATE.png"
+    delete-symbolic)
+        rm "$Screenshot"
         ;;
-        edit)
-            satty -f "$Screenshot_Dir/Screenshot_$DATE.png" & disown
+    edit-entry-symbolic)
+        uwsm app -S both -- ksnip -e "$Screenshot" &>/dev/null &
+        disown
         ;;
-        *)
-            exit 1
+    *)
+        exit 0
         ;;
     esac
-
+    exit 0
 }
 
 function copyScreenshot() {
-    wl-copy < "$Screenshot_Dir/Screenshot_$DATE.png"
+    wl-copy <"$Screenshot"
 }
 
-case $1 in 
-    full)
-        grim -c -t png "$Screenshot_Dir/Screenshot_$DATE.png"
+case $1 in
+full)
+    grim -c -t jpeg "$Screenshot"
+    copyScreenshot
+    send_notification
+    ;;
+region)
+    freezeScreen start
+    sleep 0.05
+    coords="$(slurp -b '#1E263690' -c '#285A77' -w 0)"
+    if [ $? -ne 0 ]; then
+        exit 0
+    else
+        grim -t jpeg -g "$coords" "$Screenshot"
         copyScreenshot
         send_notification
+    fi
     ;;
-    region)
-        qs ipc -c new call screenshot start
-        sleep 0.05
-        coords="$(slurp -b '#1E263690' -c '#285A77' -w 0)"
-        if [ $? -ne 0 ]; then
-            qs ipc -c new call screenshot stop
-            exit 0
-        else
-            grim -t png -l 7 -g "$coords" - | shhh -r 10 > "$Screenshot_Dir/Screenshot_$DATE.png"
-            qs ipc -c new call screenshot stop
-            copyScreenshot
-            send_notification
-        fi
-    ;;
-    *)
-        echo "Usage: screenshot
+*)
+    echo "Usage: screenshot
         full: take a full screenshot of the Screenshot
         region: take a screenshot of a selected area"
     ;;

@@ -1,0 +1,3 @@
+module Config
+singleton Colors 1.0 Colors.qml
+singleton Stuff 1.0 Stuff.qml
